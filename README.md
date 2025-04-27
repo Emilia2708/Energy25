@@ -25,3 +25,8 @@ pip install -r requirements.txt
    - skopiowanie zawartości z pliku .env.example
    - wklejenie zawartości do pliku .env
    - uzupełnienie o dane lokalne (Twoje dane konfiguracyjne)
+
+Wywołanie migracji (podstawowej)
+```shell
+python manage.py migrate
+```
