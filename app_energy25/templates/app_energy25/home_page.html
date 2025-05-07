@@ -1,0 +1,70 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Energy25</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'app_energy25/css/styles.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">Energy25</div>
+        </header>
+        <main class="main-content">
+            <section class="section wind-section">
+                <h2 class="section-title">Produkcja Energii Elektrycznej w elektrowni wiatrowej:</h2>
+                <p>Średnia prędkość wiatru: <span id="avg-wind-speed">{{ avg_wind_speed }}</span> m/s</p>
+                <p>Produkcja w elektrowni wiatrowej: <span id="energia-wiatrowa">{{ wind_farm_production }}</span> MWh</p>
+                <div class="chart-container">
+                    <canvas id="wykres-wiatrowy"></canvas>
+                </div>
+                <p>Suma energii w poszczególnych latach:</p>
+                <ul class="energy-list">
+                    {% for year, energy in wind_energy_by_year.items %}
+                        <li>{{ year }}: <span class="year-energy">{{ energy }}</span> MWh</li>
+                    {% endfor %}
+                </ul>
+                <div class="lokalizacje-wiatrowe lokalizacje-elektrowni" style="max-height: 200px; overflow: hidden;">
+                    <p>Lokalizacje elektrowni wiatrowych:</p>
+                    <ul>
+                        {% for location in wind_farm_locations %}
+                            <li>{{ location }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                 <button class="pokaz-wiecej-wiatrowe pokaz-wiecej-lokalizacji" onclick="pokazWiecejLokalizacji('wiatrowe')">Pokaż więcej</button>
+            </section>
+            <section class="section solar-section">
+                <h2 class="section-title">Produkcja Energii Elektrycznej w elektrowni fotowoltaicznej:</h2>
+                <p>Średnie nasłonecznienie: <span id="avg-sunshine">{{ avg_sunshine }}</span> kWh/m²</p>
+                <p>Produkcja w elektrowni fotowoltaicznej: <span id="energia-fotowoltaiczna">{{ solar_farm_production }}</span> MWh</p>
+                 <div class="chart-container">
+                    <canvas id="wykres-fotowoltaiczny"></canvas>
+                </div>
+                <p>Suma energii w poszczególnych latach:</p>
+                <ul class="energy-list">
+                    {% for year, energy in solar_energy_by_year.items %}
+                        <li>{{ year }}: <span class="year-energy">{{ energy }}</span> MWh</li>
+                    {% endfor %}
+                </ul>
+                <div class="lokalizacje-fotowoltaiczne lokalizacje-elektrowni" style="max-height: 200px; overflow: hidden;">
+                    <p>Lokalizacje elektrowni fotowoltaicznych:</p>
+                    <ul>
+                        {% for location in solar_farm_locations %}
+                            <li>{{ location }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <button class="pokaz-wiecej-fotowoltaiczne pokaz-wiecej-lokalizacji" onclick="pokazWiecejLokalizacji('fotowoltaiczne')">Pokaż więcej</button>
+            </section>
+        </main>
+        <footer class="footer">
+            <p>© 2025 Energy25. Wszelkie prawa zastrzeżone.</p>
+        </footer>
+    </div>
+    <script src="{% static 'app_energy25/js/scripts.js' %}"></script>
+</body>
+</html>
