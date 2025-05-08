@@ -1,0 +1,332 @@
+.rednia-prdko-wiatru1 {
+  	position: absolute;
+  	top: 0px;
+  	left: 0px;
+  	text-shadow: 1px 0 0 rgba(0, 0, 0, 0.2), 0 1px 0 rgba(0, 0, 0, 0.2), -1px 0 0 rgba(0, 0, 0, 0.2), 0 -1px 0 rgba(0, 0, 0, 0.2);
+}
+.vector-icon {
+  	position: absolute;
+  	height: 79.45%;
+  	width: 2.92%;
+  	top: 10.96%;
+  	right: 1.56%;
+  	bottom: 9.59%;
+  	left: 95.52%;
+  	max-width: 100%;
+  	overflow: hidden;
+  	max-height: 100%;
+}
+.rednia-prdko-wiatru-parent {
+  	position: absolute;
+  	top: 104px;
+  	left: 0px;
+  	width: 1920px;
+  	height: 73px;
+  	overflow: hidden;
+}
+.energy25 {
+  	position: absolute;
+  	top: calc(50% - 47px);
+  	left: calc(50% - 109px);
+  	display: inline-block;
+  	width: 230px;
+}
+.energy25-wrapper {
+  	position: absolute;
+  	top: 0px;
+  	left: 0px;
+  	width: 1920px;
+  	height: 94px;
+  	overflow: hidden;
+}
+.rednia-prdko-wiatru-inner {
+  	position: absolute;
+  	top: 0px;
+  	left: 0px;
+  	background: linear-gradient(90deg, #9b9faa, #cfc1b4 64.42%, rgba(185, 174, 170, 0.98) 96.15%);
+  	width: 1920px;
+  	height: 94px;
+  	overflow: hidden;
+  	font-size: 64px;
+  	color: #1e1e1e;
+  	font-family: Yesteryear;
+}
+.headline {
+  	align-self: stretch;
+  	position: relative;
+  	line-height: 32px;
+}
+.supporting-text {
+  	align-self: stretch;
+  	position: relative;
+  	font-size: 14px;
+  	letter-spacing: 0.25px;
+  	line-height: 20px;
+  	color: #49454f;
+  	mix-blend-mode: normal;
+}
+.text-content {
+  	align-self: stretch;
+  	overflow: hidden;
+  	display: flex;
+  	flex-direction: column;
+  	align-items: flex-start;
+  	justify-content: flex-start;
+  	padding: 24px;
+  	gap: 16px;
+}
+.state-layer-overlay {
+  	width: 100%;
+  	position: absolute;
+  	margin: 0 !important;
+  	height: 100%;
+  	top: 0%;
+  	right: 0%;
+  	bottom: 0%;
+  	left: 0%;
+  	z-index: 0;
+}
+.initial {
+  	position: absolute;
+  	top: calc(50% - 20px);
+  	left: calc(50% - 20px);
+  	letter-spacing: 0.15px;
+  	line-height: 24px;
+  	font-weight: 500;
+  	display: flex;
+  	align-items: center;
+  	justify-content: center;
+  	width: 40px;
+  	height: 40px;
+}
+.building-blocksmonogram {
+  	width: 40px;
+  	position: relative;
+  	border-radius: 100px;
+  	background-color: rgba(185, 174, 170, 0.98);
+  	height: 40px;
+  	overflow: hidden;
+  	flex-shrink: 0;
+}
+.leading-element {
+  	overflow: hidden;
+  	display: flex;
+  	flex-direction: column;
+  	align-items: flex-start;
+  	justify-content: center;
+}
+.headline1 {
+  	align-self: stretch;
+  	position: relative;
+  	letter-spacing: 0.5px;
+  	line-height: 24px;
+}
+.content1 {
+  	align-self: stretch;
+  	flex: 1;
+  	overflow: hidden;
+  	display: flex;
+  	flex-direction: column;
+  	align-items: flex-start;
+  	justify-content: center;
+  	text-align: left;
+  	color: #1d1b20;
+}
+.trailing-supporting-text {
+  	position: relative;
+  	letter-spacing: 0.5px;
+  	line-height: 16px;
+  	font-weight: 500;
+}
+.container {
+  	width: 18px;
+  	position: relative;
+  	border-radius: 2px;
+  	background-color: #49454f;
+  	height: 18px;
+  	z-index: 0;
+}
+.check-small-icon {
+  	width: 24px;
+  	position: absolute;
+  	margin: 0 !important;
+  	top: calc(50% - 12px);
+  	left: calc(50% - 12px);
+  	height: 24px;
+  	z-index: 1;
+}
+.state-layer1 {
+  	border-radius: 100px;
+  	display: flex;
+  	flex-direction: row;
+  	align-items: center;
+  	justify-content: center;
+  	padding: 11px;
+  	position: relative;
+}
+.checkboxes {
+  	display: flex;
+  	flex-direction: column;
+  	align-items: center;
+  	justify-content: center;
+  	padding: 4px 4px 4px 0px;
+}
+.trailing-element {
+  	display: flex;
+  	flex-direction: row;
+  	align-items: center;
+  	justify-content: flex-start;
+  	gap: 10px;
+  	text-align: right;
+  	font-size: 11px;
+}
+.state-layer {
+  	align-self: stretch;
+  	height: 56px;
+  	display: flex;
+  	flex-direction: row;
+  	align-items: center;
+  	justify-content: flex-start;
+  	padding: 8px 16px;
+  	box-sizing: border-box;
+  	gap: 16px;
+  	z-index: 1;
+}
+.horizontalmiddle-inset-icon {
+  	align-self: stretch;
+  	max-width: 100%;
+  	overflow: hidden;
+  	height: 1px;
+  	flex-shrink: 0;
+  	z-index: 2;
+}
+.list-item-1 {
+  	align-self: stretch;
+  	display: flex;
+  	flex-direction: column;
+  	align-items: center;
+  	justify-content: center;
+  	position: relative;
+  	min-height: 56px;
+}
+.trailing-element3 {
+  	display: flex;
+  	flex-direction: row;
+  	align-items: center;
+  	justify-content: flex-start;
+}
+.list {
+  	position: absolute;
+  	top: 0px;
+  	left: 0px;
+  	width: 280px;
+  	display: flex;
+  	flex-direction: column;
+  	align-items: flex-start;
+  	justify-content: flex-start;
+}
+.list-container {
+  	align-self: stretch;
+  	position: relative;
+  	height: 170px;
+  	overflow-y: auto;
+  	flex-shrink: 0;
+  	text-align: center;
+  	font-size: 16px;
+  	color: #49454f;
+}
+.content {
+  	width: 280px;
+  	overflow: hidden;
+  	display: flex;
+  	flex-direction: column;
+  	align-items: flex-start;
+  	justify-content: flex-start;
+}
+.label-text {
+  	position: relative;
+  	letter-spacing: 0.1px;
+  	line-height: 20px;
+  	font-weight: 500;
+}
+.state-layer24 {
+  	align-self: stretch;
+  	flex: 1;
+  	display: flex;
+  	flex-direction: row;
+  	align-items: center;
+  	justify-content: center;
+  	padding: 10px 12px;
+}
+.secondary-button {
+  	border-radius: 100px;
+  	height: 40px;
+  	overflow: hidden;
+  	display: flex;
+  	flex-direction: column;
+  	align-items: center;
+  	justify-content: center;
+}
+.actions {
+  	align-self: stretch;
+  	overflow: hidden;
+  	display: flex;
+  	flex-direction: row;
+  	align-items: flex-start;
+  	justify-content: flex-end;
+  	padding: 24px 24px 24px 16px;
+  	gap: 8px;
+  	text-align: center;
+  	font-size: 14px;
+  	color: #49454f;
+}
+.scrollable-list-dialog {
+  	position: absolute;
+  	top: 177px;
+  	left: 57px;
+  	box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  	border-radius: 28px;
+  	background-color: rgba(185, 174, 170, 0.98);
+  	border: 1px solid #000;
+  	box-sizing: border-box;
+  	width: 312px;
+  	height: 389px;
+  	display: flex;
+  	flex-direction: column;
+  	align-items: flex-start;
+  	justify-content: flex-start;
+  	min-width: 280px;
+  	max-width: 560px;
+  	font-size: 24px;
+  	color: #1d1b20;
+  	font-family: Roboto;
+}
+.image-icon {
+  	position: absolute;
+  	top: 53px;
+  	left: 0px;
+  	width: 1920px;
+  	height: 865px;
+  	overflow: hidden;
+  	object-fit: cover;
+}
+.image-wrapper {
+  	position: absolute;
+  	top: 581px;
+  	left: 0px;
+  	width: 1920px;
+  	height: 918px;
+  	overflow: hidden;
+}
+.rednia-prdko-wiatru {
+  	width: 100%;
+  	position: relative;
+  	background-color: #fff;
+  	height: 1497px;
+  	overflow: hidden;
+  	text-align: left;
+  	font-size: 40px;
+  	color: #000;
+  	font-family: Agbalumo;
+}
+

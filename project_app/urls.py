@@ -20,4 +20,5 @@ from app_energy25 import views
 
 urlpatterns = [
     path('', views.home, name='home'),
+    path("predkosc_wiatru/", views.predkosc_wiatru, name="predkosc_wiatru"),
 ]
