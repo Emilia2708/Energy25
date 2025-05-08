@@ -1,37 +1,133 @@
-.container {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    background: white;
-    overflow: hidden;
+.energy25 {
+  	position: absolute;
+  	top: calc(50% - 47px);
+  	left: calc(50% - 109px);
+  	display: inline-block;
+  	width: 230px;
 }
-.header {
-    width: 1440px;
-    height: 94px;
-    left: 0px;
-    top: 0px;
-    position: absolute;
-    background: linear-gradient(90deg, #2B2189 18%, #2B2189 18%, #564AF5 64%, #D8D8EE 100%);
-    overflow: hidden;
+.energy25-wrapper {
+  	position: absolute;
+  	top: 0px;
+  	left: 0px;
+  	width: 2000px;
+  	height: 94px;
+  	overflow: hidden;
 }
-.logo {
-    width: 230px;
-    left: 611px;
-    top: 0px;
-    position: absolute;
-    color: #1E1E1E;
-    font-size: 64px;
-    font-family: Yesteryear;
-    font-weight: 400;
-    word-wrap: break-word;
+.strona-gwna-inner {
+  	position: absolute;
+  	top: 0px;
+  	left: 0px;
+  	background: linear-gradient(90deg, #9b9faa, #cfc1b4 64.42%, rgba(185, 174, 170, 0.98) 96.15%);
+  	width: 2000px;
+  	height: 94px;
+  	overflow: hidden;
+  	font-size: 64px;
+  	color: #1e1e1e;
+  	font-family: Yesteryear;
 }
-.section-title{
-    left: 0px;
-    top: 0px;
-    position: absolute;
-    color: black;
-    font-size: 40px;
-    font-family: Agbalumo;
-    font-weight: 400;
-    word-wrap: break-word;
+.produkcja-energii-elektrycznej {
+  	position: absolute;
+  	top: 0px;
+  	left: 0px;
+  	text-shadow: 1px 0 0 rgba(0, 0, 0, 0.2), 0 1px 0 rgba(0, 0, 0, 0.2), -1px 0 0 rgba(0, 0, 0, 0.2), 0 -1px 0 rgba(0, 0, 0, 0.2);
 }
+.produkcja-energii-elektrycznej-wrapper {
+  	position: absolute;
+  	top: 94px;
+  	left: 0px;
+  	width: 1440px;
+  	height: 73px;
+  	overflow: hidden;
+}
+.produkcja-energii-elektrycznej-container {
+  	position: absolute;
+  	top: 475px;
+  	left: 0px;
+  	width: 1440px;
+  	height: 73px;
+  	overflow: hidden;
+}
+.rednia-nasonecznienie-wrapper {
+  	position: absolute;
+  	top: 548px;
+  	left: 0px;
+  	width: 1440px;
+  	height: 73px;
+  	overflow: hidden;
+}
+.suma-energii-w-poszczeglnych {
+  	margin: 0;
+  	font-family: inherit;
+  	font-size: inherit;
+  	padding-left: 53px;
+}
+.suma-energii-w-poszczeglnych-wrapper {
+  	position: absolute;
+  	top: 694px;
+  	left: 0px;
+  	width: 1440px;
+  	height: 73px;
+  	overflow: hidden;
+}
+.rednia-prdko-wiatru-wrapper {
+  	position: absolute;
+  	top: 167px;
+  	left: 0px;
+  	width: 1440px;
+  	height: 73px;
+  	overflow: hidden;
+}
+.suma-energii-w-poszczeglnych-container {
+  	position: absolute;
+  	top: 313px;
+  	left: 0px;
+  	width: 1440px;
+  	height: 73px;
+  	overflow: hidden;
+}
+.produkcja-w-elektrowni-wiatrow-wrapper {
+  	position: absolute;
+  	top: 240px;
+  	left: 0px;
+  	width: 1440px;
+  	height: 73px;
+  	overflow: hidden;
+}
+.produkcja-w-elektrowni-fotowol-wrapper {
+  	position: absolute;
+  	top: 621px;
+  	left: 0px;
+  	width: 1440px;
+  	height: 73px;
+  	overflow: hidden;
+}
+.lokalizacje-elektrowni-fotowol-wrapper {
+  	position: absolute;
+  	top: 767px;
+  	left: 0px;
+  	width: 1440px;
+  	height: 73px;
+  	overflow: hidden;
+}
+.lokalizacje-elektrowni-wiatrow-wrapper {
+  	position: absolute;
+  	top: 386px;
+  	left: 0px;
+  	width: 1440px;
+  	height: 73px;
+  	overflow: hidden;
+}
+.strona-gwna {
+  	width: 100%;
+  	position: relative;
+  	height: 1080px;
+  	background-image: url('Strona Główna.jpg');
+  	background-size: cover;
+  	background-repeat: no-repeat;
+  	background-position: top;
+  	text-align: left;
+  	font-size: 40px;
+  	color: #000;
+  	font-family: Agbalumo;
+}
+
