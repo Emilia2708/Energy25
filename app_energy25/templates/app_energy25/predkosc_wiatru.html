@@ -1,377 +1,125 @@
-{% load static%}
+{% load static %}
+
 <!DOCTYPE html>
 <html>
 <head>
-  	<meta charset="utf-8">
-  	<meta name="viewport" content="initial-scale=1, width=device-width">
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, width=device-width">
 
-  	<link rel="stylesheet"  href="static/app_energy25/css/predkosc_wiatru.css" />
-	<link rel="stylesheet"  href="static/app_energy25/css/global.css" />
-  	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Agbalumo:wght@400&display=swap" />
-  	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yesteryear:wght@400&display=swap" />
-  	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" />
+    <link rel="stylesheet"  href="{% static 'app_energy25/css/predkosc_wiatru.css' %}" />
+    <link rel="stylesheet"  href="{% static 'app_energy25/css/global.css' %}" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Agbalumo:wght@400&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yesteryear:wght@400&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" />
+    <style>
+        .list-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            border-bottom: 1px solid #eee;
+        }
 
+        .list-item:last-child {
+            border-bottom: none;
+        }
 
+        .list-item input[type="checkbox"] {
+            margin-right: 16px;
+        }
 
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            padding: 16px;
+        }
+
+        .secondary-button {
+            margin-left: 8px;
+            padding: 8px 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .label-text {
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
 
-  	<div class="rednia-prdko-wiatru">
-    		<div class="rednia-prdko-wiatru-parent">
-      			<div class="rednia-prdko-wiatru1">Średnia prędkość wiatru</div>
-      			<img class="vector-icon" alt="" src="Vector.svg">
+    <div class="rednia-prdko-wiatru">
+           <div class="rednia-prdko-wiatru-parent">
+              <div class="rednia-prdko-wiatru1">Średnia prędkość wiatru</div>
+               <li class="nav-item">
+                   <a class="nav-link" href="{% url 'home' %}">
+                       <img class="vector-icon" alt="" src="{% static 'app_energy25/css/Vector.svg' %}">
+                   </a>
+               </li>
+           </div>
+           <div class="rednia-prdko-wiatru-inner">
+              <div class="energy25-wrapper">
+                     <div class="energy25">Energy25</div>
+              </div>
+           </div>
+           <div class="scrollable-list-dialog" id="month-selection-dialog">
+              <div class="content">
+                     <div class="text-content">
+                        <div class="headline">Wybierz zakres</div>
+                        <div class="supporting-text">Zaznacz jeden lub więcej miesięcy aby pobrać informacje</div>
+                     </div>
+                     <div class="list-container">
+                        <div class="list">
+                            {% for month in months %}
+                            <div class="list-item">
+                                <input type="checkbox" name="selected_months" value="{{ month }}">
+                                <span>{{ month }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                     </div>
+              </div>
+              <div class="actions">
+                     <div class="secondary-button" onclick="selectAllMonths()">
+                        <div class="state-layer24">
+                               <div class="label-text">Zaznacz Wszystko</div>
+                        </div>
+                     </div>
+                     <div class="secondary-button" onclick="clearAllMonths()">
+                        <div class="state-layer24">
+                               <div class="label-text">Wyczyść</div>
+                        </div>
+                     </div>
+                     <button class="primary-button" onclick="getSelectedMonths()">Pobierz</button>
+              </div>
+           </div>
+           <div class="image-wrapper">
+              <img class="image-icon" alt="" src="{% static 'app_energy25/css/image.png' %}">
+           </div>
+    </div>
 
-    		</div>
-    		<div class="rednia-prdko-wiatru-inner">
-      			<div class="energy25-wrapper">
-        				<div class="energy25">Energy25</div>
-      			</div>
-    		</div>
-    		<div class="scrollable-list-dialog">
-      			<div class="content">
-        				<div class="text-content">
-          					<div class="headline">Wybierz zakres</div>
-          					<div class="supporting-text">Zaznaczz jeden lub więcej miesięcy aby pobrać informacje</div>
-        				</div>
-        				<div class="list-container">
-          					<div class="list">
-            						<div class="list-item-1">
-              							<div class="state-layer-overlay">
-              							</div>
-              							<div class="state-layer">
-                								<div class="leading-element">
-                  									<div class="building-blocksmonogram">
-                    										<div class="initial">A</div>
-                  									</div>
-                								</div>
-                								<div class="content1">
-                  									<div class="headline1">List item</div>
-                								</div>
-                								<div class="trailing-element">
-                  									<div class="trailing-supporting-text">100+</div>
-                  									<div class="checkboxes">
-                    										<div class="state-layer1">
-                      											<div class="container">
-                      											</div>
-                      											<img class="check-small-icon" alt="" src="check_small.svg">
+    <script>
+        function selectAllMonths() {
+            const checkboxes = document.querySelectorAll('#month-selection-dialog input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = true;
+            });
+        }
 
-                    										</div>
-                  									</div>
-                								</div>
-              							</div>
-              							<img class="horizontalmiddle-inset-icon" alt="" src="Horizontal/Middle-inset.svg">
+        function clearAllMonths() {
+            const checkboxes = document.querySelectorAll('#month-selection-dialog input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+        }
 
-            						</div>
-            						<div class="list-item-1">
-              							<div class="state-layer-overlay">
-              							</div>
-              							<div class="state-layer">
-                								<div class="leading-element">
-                  									<div class="building-blocksmonogram">
-                    										<div class="initial">A</div>
-                  									</div>
-                								</div>
-                								<div class="content1">
-                  									<div class="headline1">List item</div>
-                								</div>
-                								<div class="trailing-element">
-                  									<div class="trailing-supporting-text">100+</div>
-                  									<div class="checkboxes">
-                    										<div class="state-layer1">
-                      											<div class="container">
-                      											</div>
-                      											<img class="check-small-icon" alt="" src="check_small.svg">
-
-                    										</div>
-                  									</div>
-                								</div>
-              							</div>
-              							<img class="horizontalmiddle-inset-icon" alt="" src="Horizontal/Middle-inset.svg">
-
-            						</div>
-            						<div class="list-item-1">
-              							<div class="state-layer-overlay">
-              							</div>
-              							<div class="state-layer">
-                								<div class="leading-element">
-                  									<div class="building-blocksmonogram">
-                    										<div class="initial">A</div>
-                  									</div>
-                								</div>
-                								<div class="content1">
-                  									<div class="headline1">List item</div>
-                								</div>
-                								<div class="trailing-element">
-                  									<div class="trailing-supporting-text">100+</div>
-                  									<div class="checkboxes">
-                    										<div class="state-layer1">
-                      											<div class="container">
-                      											</div>
-                      											<img class="check-small-icon" alt="" src="check_small.svg">
-
-                    										</div>
-                  									</div>
-                								</div>
-              							</div>
-              							<img class="horizontalmiddle-inset-icon" alt="" src="Horizontal/Middle-inset.svg">
-
-            						</div>
-            						<div class="list-item-1">
-              							<div class="state-layer-overlay">
-              							</div>
-              							<div class="state-layer">
-                								<div class="leading-element">
-                  									<div class="building-blocksmonogram">
-                    										<div class="initial">A</div>
-                  									</div>
-                								</div>
-                								<div class="content1">
-                  									<div class="headline1">List item</div>
-                								</div>
-                								<div class="trailing-element3">
-                  									<div class="checkboxes">
-                    										<div class="state-layer1">
-                      											<div class="container">
-                      											</div>
-                      											<img class="check-small-icon" alt="" src="check_small.svg">
-
-                    										</div>
-                  									</div>
-                								</div>
-              							</div>
-              							<img class="horizontalmiddle-inset-icon" alt="" src="Horizontal/Middle-inset.svg">
-
-            						</div>
-            						<div class="list-item-1">
-              							<div class="state-layer-overlay">
-              							</div>
-              							<div class="state-layer">
-                								<div class="leading-element">
-                  									<div class="building-blocksmonogram">
-                    										<div class="initial">A</div>
-                  									</div>
-                								</div>
-                								<div class="content1">
-                  									<div class="headline1">List item</div>
-                								</div>
-                								<div class="trailing-element3">
-                  									<div class="checkboxes">
-                    										<div class="state-layer1">
-                      											<div class="container">
-                      											</div>
-                      											<img class="check-small-icon" alt="" src="check_small.svg">
-
-                    										</div>
-                  									</div>
-                								</div>
-              							</div>
-              							<img class="horizontalmiddle-inset-icon" alt="" src="Horizontal/Middle-inset.svg">
-
-            						</div>
-            						<div class="list-item-1">
-              							<div class="state-layer-overlay">
-              							</div>
-              							<div class="state-layer">
-                								<div class="leading-element">
-                  									<div class="building-blocksmonogram">
-                    										<div class="initial">A</div>
-                  									</div>
-                								</div>
-                								<div class="content1">
-                  									<div class="headline1">List item</div>
-                								</div>
-                								<div class="trailing-element3">
-                  									<div class="checkboxes">
-                    										<div class="state-layer1">
-                      											<div class="container">
-                      											</div>
-                      											<img class="check-small-icon" alt="" src="check_small.svg">
-
-                    										</div>
-                  									</div>
-                								</div>
-              							</div>
-              							<img class="horizontalmiddle-inset-icon" alt="" src="Horizontal/Middle-inset.svg">
-
-            						</div>
-            						<div class="list-item-1">
-              							<div class="state-layer-overlay">
-              							</div>
-              							<div class="state-layer">
-                								<div class="leading-element">
-                  									<div class="building-blocksmonogram">
-                    										<div class="initial">A</div>
-                  									</div>
-                								</div>
-                								<div class="content1">
-                  									<div class="headline1">List item</div>
-                								</div>
-                								<div class="trailing-element3">
-                  									<div class="checkboxes">
-                    										<div class="state-layer1">
-                      											<div class="container">
-                      											</div>
-                      											<img class="check-small-icon" alt="" src="check_small.svg">
-
-                    										</div>
-                  									</div>
-                								</div>
-              							</div>
-              							<img class="horizontalmiddle-inset-icon" alt="" src="Horizontal/Middle-inset.svg">
-
-            						</div>
-            						<div class="list-item-1">
-              							<div class="state-layer-overlay">
-              							</div>
-              							<div class="state-layer">
-                								<div class="leading-element">
-                  									<div class="building-blocksmonogram">
-                    										<div class="initial">A</div>
-                  									</div>
-                								</div>
-                								<div class="content1">
-                  									<div class="headline1">List item</div>
-                								</div>
-                								<div class="trailing-element3">
-                  									<div class="checkboxes">
-                    										<div class="state-layer1">
-                      											<div class="container">
-                      											</div>
-                      											<img class="check-small-icon" alt="" src="check_small.svg">
-
-                    										</div>
-                  									</div>
-                								</div>
-              							</div>
-              							<img class="horizontalmiddle-inset-icon" alt="" src="Horizontal/Middle-inset.svg">
-
-            						</div>
-            						<div class="list-item-1">
-              							<div class="state-layer-overlay">
-              							</div>
-              							<div class="state-layer">
-                								<div class="leading-element">
-                  									<div class="building-blocksmonogram">
-                    										<div class="initial">A</div>
-                  									</div>
-                								</div>
-                								<div class="content1">
-                  									<div class="headline1">List item</div>
-                								</div>
-                								<div class="trailing-element3">
-                  									<div class="checkboxes">
-                    										<div class="state-layer1">
-                      											<div class="container">
-                      											</div>
-                      											<img class="check-small-icon" alt="" src="check_small.svg">
-
-                    										</div>
-                  									</div>
-                								</div>
-              							</div>
-              							<img class="horizontalmiddle-inset-icon" alt="" src="Horizontal/Middle-inset.svg">
-
-            						</div>
-            						<div class="list-item-1">
-              							<div class="state-layer-overlay">
-              							</div>
-              							<div class="state-layer">
-                								<div class="leading-element">
-                  									<div class="building-blocksmonogram">
-                    										<div class="initial">A</div>
-                  									</div>
-                								</div>
-                								<div class="content1">
-                  									<div class="headline1">List item</div>
-                								</div>
-                								<div class="trailing-element3">
-                  									<div class="checkboxes">
-                    										<div class="state-layer1">
-                      											<div class="container">
-                      											</div>
-                      											<img class="check-small-icon" alt="" src="check_small.svg">
-
-                    										</div>
-                  									</div>
-                								</div>
-              							</div>
-              							<img class="horizontalmiddle-inset-icon" alt="" src="Horizontal/Middle-inset.svg">
-
-            						</div>
-            						<div class="list-item-1">
-              							<div class="state-layer-overlay">
-              							</div>
-              							<div class="state-layer">
-                								<div class="leading-element">
-                  									<div class="building-blocksmonogram">
-                    										<div class="initial">A</div>
-                  									</div>
-                								</div>
-                								<div class="content1">
-                  									<div class="headline1">List item</div>
-                								</div>
-                								<div class="trailing-element3">
-                  									<div class="checkboxes">
-                    										<div class="state-layer1">
-                      											<div class="container">
-                      											</div>
-                      											<img class="check-small-icon" alt="" src="check_small.svg">
-
-                    										</div>
-                  									</div>
-                								</div>
-              							</div>
-              							<img class="horizontalmiddle-inset-icon" alt="" src="Horizontal/Middle-inset.svg">
-
-            						</div>
-            						<div class="list-item-1">
-              							<div class="state-layer-overlay">
-              							</div>
-              							<div class="state-layer">
-                								<div class="leading-element">
-                  									<div class="building-blocksmonogram">
-                    										<div class="initial">A</div>
-                  									</div>
-                								</div>
-                								<div class="content1">
-                  									<div class="headline1">List item</div>
-                								</div>
-                								<div class="trailing-element3">
-                  									<div class="checkboxes">
-                    										<div class="state-layer1">
-                      											<div class="container">
-                      											</div>
-                      											<img class="check-small-icon" alt="" src="check_small.svg">
-
-                    										</div>
-                  									</div>
-                								</div>
-              							</div>
-            						</div>
-          					</div>
-        				</div>
-      			</div>
-      			<div class="actions">
-        				<div class="secondary-button">
-          					<div class="state-layer24">
-            						<div class="label-text">Zaznacz Wszystko</div>
-          					</div>
-        				</div>
-        				<div class="secondary-button">
-          					<div class="state-layer24">
-            						<div class="label-text">Wyczyść</div>
-          					</div>
-        				</div>
-      			</div>
-    		</div>
-    		<div class="image-wrapper">
-      			<img class="image-icon" alt="" src="image.png">
-
-    		</div>
-  	</div>
-
-
-
+        function getSelectedMonths() {
+            const checkboxes = document.querySelectorAll('#month-selection-dialog input[type="checkbox"]:checked');
+            const selectedMonths = Array.from(checkboxes).map(checkbox => checkbox.value);
+            console.log("Wybrane miesiące:", selectedMonths);
+            // Tutaj możesz wysłać te dane do backendu Django np. za pomocą AJAX
+        }
+    </script>
 
 </body>
 </html>
