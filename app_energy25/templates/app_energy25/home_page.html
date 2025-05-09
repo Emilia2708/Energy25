@@ -30,14 +30,18 @@
     		<div class="rednia-nasonecznienie-wrapper">
       			<div class="produkcja-energii-elektrycznej">
         				<ul class="suma-energii-w-poszczeglnych">
-          					<li>Średnia nasłonecznienie</li>
+          					<li class="nav-item">
+								<a class="nav-link" href="{% url 'naslonecznienie' %}">Średnie nasłonecznienie</a>
+							</li>
         				</ul>
       			</div>
     		</div>
     		<div class="suma-energii-w-poszczeglnych-wrapper">
       			<div class="produkcja-energii-elektrycznej">
         				<ul class="suma-energii-w-poszczeglnych">
-          					<li>Suma energii w poszczególnych latach</li>
+							<li class="nav-item">
+								<a class="nav-link" href="{% url 'suma_pv' %}">Suma energii w poszczególnych latach</a>
+							</li>
         				</ul>
       			</div>
     		</div>
@@ -53,7 +57,9 @@
     		<div class="suma-energii-w-poszczeglnych-container">
 				<div class="produkcja-energii-elektrycznej">
         				<ul class="suma-energii-w-poszczeglnych">
-          					<li>Suma energii w poszczególnych latach</li>
+							<li class="nav-item">
+								<a class="nav-link" href="{% url 'suma_wiatrowa' %}">Suma energii w poszczególnych latach</a>
+							</li>
         				</ul>
       			</div>
     		</div>
@@ -61,7 +67,7 @@
       			<div class="produkcja-energii-elektrycznej">
         				<ul class="suma-energii-w-poszczeglnych">
           					<li class="nav-item">
-								<a class="nav-link" href="{% url 'predkosc_wiatru' %}">Produkcja w elektrowni wiatrowej</a>
+								<a class="nav-link" href="{% url 'produkcja_wiatrowa' %}">Produkcja w elektrowni wiatrowej</a>
 							</li>
         				</ul>
       			</div>
@@ -69,21 +75,27 @@
     		<div class="produkcja-w-elektrowni-fotowol-wrapper">
       			<div class="produkcja-energii-elektrycznej">
         				<ul class="suma-energii-w-poszczeglnych">
-          					<li>Produkcja w elektrowni fotowoltaicznej</li>
+							<li class="nav-item">
+								<a class="nav-link" href="{% url 'produkcja_pv' %}">Produkcja w elektrowni fotowoltaicznej</a>
+							</li>
         				</ul>
       			</div>
     		</div>
     		<div class="lokalizacje-elektrowni-fotowol-wrapper">
       			<div class="produkcja-energii-elektrycznej">
         				<ul class="suma-energii-w-poszczeglnych">
-          					<li>Lokalizacje elektrowni fotowoltaicznych</li>
+							<li class="nav-item">
+								<a class="nav-link" href="{% url 'lokalizacje_pv' %}">Lokalizacje elektrowni fotowoltaicznych</a>
+							</li>
         				</ul>
       			</div>
     		</div>
     		<div class="lokalizacje-elektrowni-wiatrow-wrapper">
       			<div class="produkcja-energii-elektrycznej">
         				<ul class="suma-energii-w-poszczeglnych">
-          					<li>Lokalizacje elektrowni wiatrowych</li>
+							<li class="nav-item">
+								<a class="nav-link" href="{% url 'lokalizacje_wiatrowe' %}">Lokalizacje elektrowni wiatrowych</a>
+							</li>
         				</ul>
       			</div>
     		</div>

@@ -21,4 +21,11 @@ from app_energy25 import views
 urlpatterns = [
     path('', views.home, name='home'),
     path("predkosc_wiatru/", views.predkosc_wiatru, name="predkosc_wiatru"),
+    path("produkcja_wiatrowa/", views.produkcja_wiatrowa, name="produkcja_wiatrowa"),
+    path("suma_wiatrowa/", views.suma_wiatrowa, name="suma_wiatrowa"),
+    path("lokalizacje_wiatrowe/", views.lokalizacje_wiatrowe, name="lokalizacje_wiatrowe"),
+    path("naslonecznienie/", views.naslonecznienie, name="naslonecznienie"),
+    path("produkcja_pv/", views.produkcja_pv, name="produkcja_pv"),
+    path("suma_pv/", views.suma_pv, name="suma_pv"),
+    path("lokalizacje_pv/", views.lokalizacje_pv, name="lokalizacje_pv"),
 ]
