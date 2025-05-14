@@ -42,6 +42,8 @@ wpisy['Kod1'] = wpisy['Kod'].str[:1]
 wpisy_pv = wpisy[wpisy['RodzajInstalacji'] == 'PVA']
 wpisy_wil = wpisy[wpisy['RodzajInstalacji'] == 'WIL']
 
+wpisy_wil['A'] = (wpisy_wil['MocEEInstalacji']*(10**6))/(0.5*1.22*(14**3)*0.95*0.85*0.593)
+
 # K O D Y  P O C Z T O W E
 kody_pocztowe = pd.read_csv("C:\\Users\\HP\\Desktop\\Projekt\\Kody pocztowe\\kody.csv"
                         , encoding = 'utf-8'
