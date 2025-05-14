@@ -62,35 +62,35 @@
                      <div class="energy25">Energy25</div>
               </div>
            </div>
-           <div class="scrollable-list-dialog" id="month-selection-dialog">
+           <div class="scrollable-list-dialog" id="year-selection-dialog">
               <div class="content">
                      <div class="text-content">
                         <div class="headline">Wybierz zakres</div>
-                        <div class="supporting-text">Zaznacz jeden lub więcej miesięcy aby pobrać informacje</div>
+                        <div class="supporting-text">Zaznacz jeden lub więcej rok aby pobrać informacje</div>
                      </div>
                      <div class="list-container">
                         <div class="list">
-                            {% for month in months %}
+                            {% for year in years %}
                             <div class="list-item">
-                                <input type="checkbox" name="selected_months" value="{{ month }}">
-                                <span>{{ month }}</span>
+                                <input type="checkbox" name="selected_year" value="{{ year }}">
+                                <span>{{ year }}</span>
                             </div>
                             {% endfor %}
                         </div>
                      </div>
               </div>
               <div class="actions">
-                     <div class="secondary-button" onclick="selectAllMonths()">
+                     <div class="secondary-button" onclick="selectAllYears()">
                         <div class="state-layer24">
                                <div class="label-text">Zaznacz Wszystko</div>
                         </div>
                      </div>
-                     <div class="secondary-button" onclick="clearAllMonths()">
+                     <div class="secondary-button" onclick="clearAllYears()">
                         <div class="state-layer24">
                                <div class="label-text">Wyczyść</div>
                         </div>
                      </div>
-                     <button class="primary-button" onclick="getSelectedMonths()">Pobierz</button>
+                     <button class="primary-button" onclick="getSelectedYears()">Pobierz</button>
               </div>
            </div>
            <div class="image-wrapper">
@@ -99,24 +99,24 @@
     </div>
 
     <script>
-        function selectAllMonths() {
-            const checkboxes = document.querySelectorAll('#month-selection-dialog input[type="checkbox"]');
+        function selectAllYears() {
+            const checkboxes = document.querySelectorAll('#year-selection-dialog input[type="checkbox"]');
             checkboxes.forEach(checkbox => {
                 checkbox.checked = true;
             });
         }
 
-        function clearAllMonths() {
-            const checkboxes = document.querySelectorAll('#month-selection-dialog input[type="checkbox"]');
+        function clearAllYears() {
+            const checkboxes = document.querySelectorAll('#year-selection-dialog input[type="checkbox"]');
             checkboxes.forEach(checkbox => {
                 checkbox.checked = false;
             });
         }
 
-        function getSelectedMonths() {
-            const checkboxes = document.querySelectorAll('#month-selection-dialog input[type="checkbox"]:checked');
-            const selectedMonths = Array.from(checkboxes).map(checkbox => checkbox.value);
-            console.log("Wybrane miesiące:", selectedMonths);
+        function getSelectedYears() {
+            const checkboxes = document.querySelectorAll('#year-selection-dialog input[type="checkbox"]:checked');
+            const selectedYear = Array.from(checkboxes).map(checkbox => checkbox.value);
+            console.log("Wybrane miesiące:", selectedYear);
             // Tutaj możesz wysłać te dane do backendu Django np. za pomocą AJAX
         }
     </script>
