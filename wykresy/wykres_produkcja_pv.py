@@ -1,5 +1,4 @@
 import pandas as pd
-import plotly.graph_objects as go
 
 class AnalizaEnergiiPV:
     def __init__(self, dataframe):
@@ -36,46 +35,19 @@ class AnalizaEnergiiPV:
         """
         print(self.suma_energii)
 
-    def generuj_wykres_energii(self, wybrane_lata=None, tytul='Energia w elektrowniach słonecznych', os_x_tytul='Miesiąc', os_y_tytul='Suma energii (MWh)'):
+    def pobierz_dane_dla_lat(self, wybrane_lata):
         """
-        Generuje interaktywny wykres liniowy przedstawiający sumę energii dla wybranych lat.
+        Pobiera zagregowane dane energii dla wybranych lat w formacie odpowiednim dla Chart.js.
 
         Args:
-            wybrane_lata (list, optional): Lista lat, dla których ma zostać wygenerowany wykres.
-                                          Jeśli None, wyświetlone zostaną wszystkie dostępne lata. Domyślnie None.
-            tytul (str, optional): Tytuł wykresu. Domyślnie 'Energia w elektrowniach słonecznych'.
-            os_x_tytul (str, optional): Tytuł osi X. Domyślnie 'Miesiąc'.
-            os_y_tytul (str, optional): Tytuł osi Y. Domyślnie 'Suma energii (MWh)'.
+            wybrane_lata (list): Lista lat, dla których mają zostać pobrane dane.
 
         Returns:
-            plotly.graph_objects.Figure: Obiekt figury Plotly.
+            dict: Słownik zawierający listy etykiet (Rok - Miesiąc) i wartości sum energii.
         """
-        fig_pv = go.Figure()
-        for rok, grupa in self.suma_energii.groupby(level=0):
-            if wybrane_lata is None or rok in wybrane_lata:
-                fig_pv.add_trace(go.Scatter(x=grupa.index.get_level_values(1), y=grupa.values, mode='lines', name=str(rok)))
-
-        fig_pv.update_layout(title=tytul,
-                             xaxis_title=os_x_tytul,
-                             yaxis_title=os_y_tytul)
-        return fig_pv
-
-# Przykład użycia klasy z wyborem lat:
-# Załóżmy, że masz DataFrame o nazwie 'wpisy_pv_pogoda'
-analiza = AnalizaEnergiiPV(wpisy_pv_pogoda)
-
-# Wyświetl sumę energii (opcjonalnie)
-analiza.wyswietl_sume_energii()
-
-# Wygeneruj wykres dla wszystkich lat
-wykres_wszystkie = analiza.generuj_wykres_energii()
-wykres_wszystkie.show()
-
-# Wygeneruj wykres tylko dla wybranych lat (np. 2022 i 2023)
-wybrane_lata_do_wykresu = [2022, 2023]
-wykres_wybrane = analiza.generuj_wykres_energii(wybrane_lata=wybrane_lata_do_wykresu)
-wykres_wybrane.show()
-
-# Wygeneruj wykres z niestandardowym tytułem
-wykres_niestandardowy = analiza.generuj_wykres_energii(wybrane_lata=[2024], tytul='Energia PV w 2024 roku')
-wykres_niestandardowy.show()
+        dane_wykresu = {'labels': [], 'values': []}
+        for (rok, miesiac), energia in self.suma_energii.items():
+            if rok in wybrane_lata:
+                dane_wykresu['labels'].append(f'{rok} - {miesiac:02d}')
+                dane_wykresu['values'].append(energia)
+        return dane_wykresu

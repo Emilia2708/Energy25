@@ -1,4 +1,5 @@
 {% load static %}
+{% csrf_token %}
 
 <!DOCTYPE html>
 <html>
@@ -11,6 +12,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Agbalumo:wght@400&display=swap" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yesteryear:wght@400&display=swap" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .list-item {
             display: flex;
@@ -44,13 +46,22 @@
         .label-text {
             font-size: 14px;
         }
+
+        #chart-container {
+            position: absolute;
+            top: 581px;
+            left: 0px;
+            width: 1920px;
+            height: 918px;
+            /* Dostosuj style kontenera wykresu */
+        }
     </style>
 </head>
 <body>
 
     <div class="rednia-prdko-wiatru">
            <div class="rednia-prdko-wiatru-parent">
-              <div class="rednia-prdko-wiatru1">Produkcja w elektrowni fotowoltaicznej</div>
+              <div class="rednia-prdko-wiatru1">Produkcja Energii PV</div>
                <li class="nav-item">
                    <a class="nav-link" href="{% url 'home' %}">
                        <img class="vector-icon" alt="" src="{% static 'app_energy25/css/Vector.svg' %}">
@@ -65,8 +76,8 @@
            <div class="scrollable-list-dialog" id="year-selection-dialog">
               <div class="content">
                      <div class="text-content">
-                        <div class="headline">Wybierz zakres</div>
-                        <div class="supporting-text">Zaznacz jeden lub więcej rok aby pobrać informacje</div>
+                        <div class="headline">Wybierz lata</div>
+                        <div class="supporting-text">Zaznacz lata, dla których chcesz zobaczyć produkcję energii PV</div>
                      </div>
                      <div class="list-container">
                         <div class="list">
@@ -90,12 +101,10 @@
                                <div class="label-text">Wyczyść</div>
                         </div>
                      </div>
-                     <button class="primary-button" onclick="getSelectedYears()">Pobierz</button>
+                     <button class="primary-button" onclick="fetchAndDrawChart()">Pobierz Wykres</button>
               </div>
            </div>
-           <div class="image-wrapper">
-              <img class="image-icon" alt="" src="{% static 'app_energy25/css/image.png' %}">
-           </div>
+           <canvas id="chart-container" style="position: absolute; top: 581px; left: 0px; width: 1920px; height: 918px;"></canvas>
     </div>
 
     <script>
@@ -115,9 +124,73 @@
 
         function getSelectedYears() {
             const checkboxes = document.querySelectorAll('#year-selection-dialog input[type="checkbox"]:checked');
-            const selectedYear = Array.from(checkboxes).map(checkbox => checkbox.value);
-            console.log("Wybrane miesiące:", selectedYear);
-            // Tutaj możesz wysłać te dane do backendu Django np. za pomocą AJAX
+            return Array.from(checkboxes).map(checkbox => checkbox.value);
+        }
+
+        async function fetchAndDrawChart() {
+            const selectedYears = getSelectedYears();
+            console.log("Wybrane lata:", selectedYears);
+
+            try {
+                const response = await fetch('/pobierz_dane_pv/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    },
+                    body: JSON.stringify({ years: selectedYears }),
+                });
+
+                if (!response.ok) {
+                    console.error('Błąd podczas pobierania danych:', response.status);
+                    document.getElementById('chart-container').innerHTML = '<p style="color: red;">Błąd podczas pobierania danych wykresu.</p>';
+                    return;
+                }
+
+                const data = await response.json();
+                drawChart(data);
+
+            } catch (error) {
+                console.error('Wystąpił błąd:', error);
+                document.getElementById('chart-container').innerHTML = '<p style="color: red;">Wystąpił błąd podczas generowania wykresu.</p>';
+            }
+        }
+
+        function drawChart(chartData) {
+            const ctx = document.getElementById('chart-container').getContext('2d');
+            if (window.myChart) {
+                window.myChart.destroy(); // Usuń poprzedni wykres, jeśli istnieje
+            }
+            window.myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartData.labels,
+                    datasets: [{
+                        label: 'Suma energii (MWh)',
+                        data: chartData.values,
+                        backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Suma energii (MWh)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Rok - Miesiąc'
+                            }
+                        }
+                    }
+                }
+            });
         }
     </script>
 

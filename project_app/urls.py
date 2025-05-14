@@ -28,4 +28,5 @@ urlpatterns = [
     path("produkcja_pv/", views.produkcja_pv, name="produkcja_pv"),
     path("suma_pv/", views.suma_pv, name="suma_pv"),
     path("lokalizacje_pv/", views.lokalizacje_pv, name="lokalizacje_pv"),
+    path("pobierz_dane_pv/", views.pobierz_dane_pv, name="pobierz_dane_pv"),
 ]
