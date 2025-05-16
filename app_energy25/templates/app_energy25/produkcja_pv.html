@@ -47,12 +47,12 @@
             font-size: 14px;
         }
 
-        #chart-container {
+        #pvChart { /* Zmieniono ID canvas na bardziej opisowe */
             position: absolute;
             top: 581px;
             left: 0px;
             width: 1920px;
-            height: 918px;
+            height: 2000px;
             /* Dostosuj style kontenera wykresu */
         }
     </style>
@@ -104,7 +104,7 @@
                      <button class="primary-button" onclick="fetchAndDrawChart()">Pobierz Wykres</button>
               </div>
            </div>
-           <canvas id="chart-container" style="position: absolute; top: 581px; left: 0px; width: 1920px; height: 918px;"></canvas>
+           <canvas id="pvChart" style="position: absolute; top: 581px; left: 0px; width: 1920px; height: 2000px;"></canvas>
     </div>
 
     <script>
@@ -143,50 +143,141 @@
 
                 if (!response.ok) {
                     console.error('Błąd podczas pobierania danych:', response.status);
-                    document.getElementById('chart-container').innerHTML = '<p style="color: red;">Błąd podczas pobierania danych wykresu.</p>';
+                    document.getElementById('pvChart').innerHTML = '<p style="color: red;">Błąd podczas pobierania danych wykresu.</p>';
                     return;
                 }
 
                 const data = await response.json();
+                if (!data || !data.labels || !data.values || Object.keys(data.values).length === 0 || data.labels.length === 0) {
+                    console.warn('Puste lub nieprawidłowe dane:', data);
+                    document.getElementById('pvChart').innerHTML = '<p style="color: red;">Brak danych do wyświetlenia wykresu.</p>';
+                    return;
+                }
                 drawChart(data);
 
             } catch (error) {
                 console.error('Wystąpił błąd:', error);
-                document.getElementById('chart-container').innerHTML = '<p style="color: red;">Wystąpił błąd podczas generowania wykresu.</p>';
+                document.getElementById('pvChart').innerHTML = '<p style="color: red;">Wystąpił błąd podczas generowania wykresu.</p>';
             }
         }
 
         function drawChart(chartData) {
-            const ctx = document.getElementById('chart-container').getContext('2d');
+            const ctx = document.getElementById('pvChart').getContext('2d');
             if (window.myChart) {
-                window.myChart.destroy(); // Usuń poprzedni wykres, jeśli istnieje
+                window.myChart.destroy();
             }
+            const colors = [
+                'rgba(255, 99, 132, 0.8)',
+                'rgba(54, 162, 235, 0.8)',
+                'rgba(255, 206, 86, 0.8)',
+                'rgba(75, 192, 192, 0.8)',
+                'rgba(153, 102, 255, 0.8)',
+                'rgba(255, 159, 64, 0.8)',
+                'rgba(199, 0, 57, 0.8)',
+                'rgba(2, 136, 209, 0.8)',
+                'rgba(251, 192, 45, 0.8)',
+                'rgba(56, 142, 60, 0.8)',
+                'rgba(123, 36, 28, 0.8)',
+                'rgba(156, 39, 176, 0.8)'
+            ];
+
+            const datasets = [];
+            let colorIndex = 0;
+            for (const year in chartData.values) {
+                datasets.push({
+                    label: year,
+                    data: chartData.values[year],
+                    backgroundColor: colors[colorIndex % colors.length],
+                    borderColor: colors[colorIndex % colors.length],
+                    fill: false,
+                    pointRadius: 0
+                });
+                colorIndex++;
+            }
+
             window.myChart = new Chart(ctx, {
-                type: 'bar',
+                type: 'line',
                 data: {
                     labels: chartData.labels,
-                    datasets: [{
-                        label: 'Suma energii (MWh)',
-                        data: chartData.values,
-                        backgroundColor: 'rgba(255, 99, 132, 0.8)',
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        borderWidth: 1
-                    }]
+                    datasets: datasets
                 },
                 options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            left: 50,
+                            right: 50,
+                            top: 50,
+                            bottom: 50
+                        }
+                    },
                     scales: {
                         y: {
                             beginAtZero: true,
+                            min: 0,
                             title: {
                                 display: true,
-                                text: 'Suma energii (MWh)'
+                                text: 'Suma energii (MWh)',
+                                font: {
+                                    size: 14
+                                }
+                            },
+                            ticks: {
+                                callback: function(value, index, values) {
+                                    return value / 1000000 + 'M';
+                                },
+                                font: {
+                                    size: 12
+                                }
                             }
                         },
                         x: {
                             title: {
                                 display: true,
-                                text: 'Rok - Miesiąc'
+                                text: 'Miesiąc',
+                                font: {
+                                    size: 14
+                                }
+                            },
+                            ticks: {
+                                autoSkip: false,
+                                maxRotation: 0,
+                                minRotation: 0,
+                                callback: function(value, index, values) {
+                                    const months = ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'];
+                                    return months[value - 1];
+                                },
+                                font: {
+                                    size: 12
+                                }
                             }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 14
+                                },
+                                usePointStyle: false
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Energia Wyprodukowana w Elektrowniach Słonecznych',
+                            font: {
+                                size: 18
+                            },
+                            padding: {
+                                bottom: 20
+                            }
+                        }
+                    },
+                    elements: {
+                        line: {
+                            tension: 0.4
                         }
                     }
                 }

@@ -128,3 +128,33 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'wykresy.wykres_produkcja_pv': {  # Zmień na nazwę Twojej aplikacji i pliku
+            'handlers': ['console'],
+            'level': 'DEBUG',  # Ustaw na DEBUG, aby zobaczyć wszystkie logi debugowania
+            'propagate': False,
+        },
+        'app_energy25.views': { # Jeśli chcesz logować z views.py
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'sqlalchemy.engine': { # Jeśli chcesz logować zapytania SQL
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARNING',
+    },
+}
