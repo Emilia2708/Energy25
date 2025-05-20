@@ -47,13 +47,22 @@
             font-size: 14px;
         }
 
-        #pvChart { /* Zmieniono ID canvas na bardziej opisowe */
-            position: absolute;
-            top: 581px;
-            left: 0px;
-            width: 1920px;
-            height: 2000px;
-            /* Dostosuj style kontenera wykresu */
+        /* Nowe style dla kontenera wykresu */
+        .chart-wrapper {
+            position: relative; /* Ustawienie na relative, aby canvas mógł być pozycjonowany wewnątrz, jeśli to konieczne, ale generalnie lepiej unikać absolutnego pozycjonowania dla canvas, chyba że jest to ściśle kontrolowane */
+            width: 100%; /* Ustaw szerokość na 100% dostępnego miejsca */
+            height: 600px; /* Rozsądna wysokość dla wykresu. Dostosuj, jeśli potrzebujesz więcej miejsca */
+            max-width: 1920px; /* Ogranicz maksymalną szerokość, jeśli to konieczne */
+            margin: 20px auto; /* Wyśrodkowanie i margines */
+            overflow: hidden; /* Ukryj to, co wychodzi poza kontener, ale Chart.js powinien dobrze skalować */
+            /* Jeśli wykres miałby być bardzo wysoki i wymagał przewijania, użyj: overflow-y: auto; */
+        }
+
+        #pvChart {
+            /* Usunięto position: absolute, top, left, width, height, aby pozwolić Chart.js na lepsze zarządzanie rozmiarem
+               wewnątrz jego nadrzędnego elementu (.chart-wrapper). */
+            width: 100% !important; /* Ważne, aby Chart.js prawidłowo skalował szerokość */
+            height: 100% !important; /* Ważne, aby Chart.js prawidłowo skalował wysokość */
         }
     </style>
 </head>
@@ -104,7 +113,9 @@
                      <button class="primary-button" onclick="fetchAndDrawChart()">Pobierz Wykres</button>
               </div>
            </div>
-           <canvas id="pvChart" style="position: absolute; top: 581px; left: 0px; width: 1920px; height: 2000px;"></canvas>
+
+           <div class="chart-wrapper" style="top: 581px;"> <canvas id="pvChart"></canvas>
+           </div>
     </div>
 
     <script>
@@ -143,21 +154,25 @@
 
                 if (!response.ok) {
                     console.error('Błąd podczas pobierania danych:', response.status);
-                    document.getElementById('pvChart').innerHTML = '<p style="color: red;">Błąd podczas pobierania danych wykresu.</p>';
+                    // Zamiast innerHTML na canvas, lepiej wyświetlić błąd w innym miejscu
+                    const chartWrapper = document.querySelector('.chart-wrapper');
+                    chartWrapper.innerHTML = '<p style="color: red; text-align: center;">Błąd podczas pobierania danych wykresu.</p>';
                     return;
                 }
 
                 const data = await response.json();
                 if (!data || !data.labels || !data.values || Object.keys(data.values).length === 0 || data.labels.length === 0) {
                     console.warn('Puste lub nieprawidłowe dane:', data);
-                    document.getElementById('pvChart').innerHTML = '<p style="color: red;">Brak danych do wyświetlenia wykresu.</p>';
+                    const chartWrapper = document.querySelector('.chart-wrapper');
+                    chartWrapper.innerHTML = '<p style="color: red; text-align: center;">Brak danych do wyświetlenia wykresu.</p>';
                     return;
                 }
                 drawChart(data);
 
             } catch (error) {
                 console.error('Wystąpił błąd:', error);
-                document.getElementById('pvChart').innerHTML = '<p style="color: red;">Wystąpił błąd podczas generowania wykresu.</p>';
+                const chartWrapper = document.querySelector('.chart-wrapper');
+                chartWrapper.innerHTML = '<p style="color: red; text-align: center;">Wystąpił błąd podczas generowania wykresu.</p>';
             }
         }
 
@@ -203,7 +218,7 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
+                    maintainAspectRatio: false, // KLUCZOWE: Pozwala Chart.js na dopasowanie do wysokości kontenera
                     layout: {
                         padding: {
                             left: 50,
@@ -216,6 +231,7 @@
                         y: {
                             beginAtZero: true,
                             min: 0,
+                            // max: 200000000, // ZAKOMENTUJ LUB USUŃ, JEŚLI CHCESZ, ABY OŚ Y SKALOWAŁA SIĘ AUTOMATYCZNIE
                             title: {
                                 display: true,
                                 text: 'Suma energii (MWh)',
@@ -225,7 +241,13 @@
                             },
                             ticks: {
                                 callback: function(value, index, values) {
-                                    return value / 1000000 + 'M';
+                                    // Sprawdź, czy wartość jest na tyle duża, że ma sens wyświetlanie "M"
+                                    if (value >= 1000000) {
+                                        return (value / 1000000).toFixed(1) + 'M'; // Zaokrągl do 1 miejsca po przecinku
+                                    } else if (value >= 1000) {
+                                        return (value / 1000).toFixed(1) + 'k'; // Wyświetl w tysiącach
+                                    }
+                                    return value;
                                 },
                                 font: {
                                     size: 12

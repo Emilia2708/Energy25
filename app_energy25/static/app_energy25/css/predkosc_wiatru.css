@@ -35,9 +35,13 @@
     position: absolute;
     top: 0px;
     left: 0px;
+    background: linear-gradient(90deg, #9b9faa, #cfc1b4 64.42%, rgba(185, 174, 170, 0.98) 96.15%);
     width: 1920px;
     height: 94px;
     overflow: hidden;
+    font-size: 64px;
+    color: #1e1e1e;
+    font-family: Yesteryear;
 }
 .rednia-prdko-wiatru-inner {
     position: absolute;
@@ -301,6 +305,25 @@
     color: #1d1b20;
     font-family: Roboto;
 }
+.rednia-prdko-wiatru {
+    width: 100%;
+    position: relative;
+    background-color: #fff;
+    height: 2000px;
+    overflow: hidden;
+    text-align: left;
+    font-size: 40px;
+    color: #000;
+    font-family: Agbalumo;
+}
+
+/* Usunięte lub zmodyfikowane reguły, które kolidowały z wyświetlaniem wykresu */
+/* Poniższe reguły zostały usunięte, ponieważ:
+   1. Są niepotrzebne dla wykresu PV generowanego przez Chart.js.
+   2. Mogły powodować nakładanie się elementów lub błędne pozycjonowanie.
+   3. Pozycjonowanie i rozmiar wykresu są teraz kontrolowane przez .chart-wrapper i #pvChart w produkcja_pv.html.
+*/
+/*
 .image-icon {
     position: absolute;
     top: 53px;
@@ -318,22 +341,12 @@
     height: 2000px;
     overflow: hidden;
 }
-.rednia-prdko-wiatru {
-    width: 100%;
-    position: relative;
-    background-color: #fff;
-    height: 2000px;
-    overflow: hidden;
-    text-align: left;
-    font-size: 40px;
-    color: #000;
-    font-family: Agbalumo;
-}
 #chart-container {
     position: absolute;
     top: 581px;
     left: 0px;
     width: 1920px;
-    height: 2000px; /* Zmieniono wysokość na 2000px */
-    /* Dostosuj style kontenera wykresu */
+    height: 2000px;
+    // Dostosuj style kontenera wykresu
 }
+*/

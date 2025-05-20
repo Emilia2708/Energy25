@@ -8,8 +8,8 @@ from dotenv import load_dotenv
 from wykresy.wykres_produkcja_pv import AnalizaEnergiiPV
 import json
 import logging
-import plotly.graph_objects as go
-from plotly.offline import plot  # Importuj plot z plotly.offline
+# import plotly.graph_objects as go  # Usunięto import Plotly
+# from plotly.offline import plot  # Usunięto import Plotly
 
 # Konfiguracja logowania
 logger = logging.getLogger(__name__)
@@ -36,7 +36,7 @@ def wczytaj_dane_pv():
         logger.error(f"Wystąpił błąd podczas pobierania danych z bazy danych: {e}", exc_info=True)
         return None
     finally:
-        if engine:
+        if 'engine' in locals() and engine: # Sprawdzenie czy engine został zainicjalizowany
             engine.dispose()
 
 def produkcja_pv(request):
@@ -46,29 +46,26 @@ def produkcja_pv(request):
     years_list = list(range(2015, 2024))
     df_pv = wczytaj_dane_pv()  # Pobierz dane PV
     if df_pv is None:
-        return render(request, 'app_energy25/produkcja_pv.html', {'error': 'Nie udało się pobrać danych PV z bazy danych'},)
+        return render(request, 'app_energy25/produkcja_pv.html', {'error': 'Nie udało się pobrać danych PV z bazy danych'})
 
-    analiza_pv = AnalizaEnergiiPV(df_pv)
-    suma_energii = analiza_pv._oblicz_sume_energii()
-
-    # Tworzenie wykresu Plotly
-    fig_pv = go.Figure()
-    for rok, grupa in suma_energii.groupby(level=0):
-        fig_pv.add_trace(go.Scatter(x=grupa.index.get_level_values(1), y=grupa.values, mode='lines', name=str(rok)))
-    fig_pv.update_layout(
-        title='Energia wyprodukowana w elektrowniach słonecznych',
-        xaxis_title='Miesiąc',
-        yaxis_title='Suma energii (MWh)',
-        height=600,  # Dodano ustawienie wysokości
-        width=800,   # Dodano ustawienie szerokości
-    )
-
-    # Konwertuj wykres na HTML i przekaż do szablonu
-    plot_html = plot(fig_pv, output_type='div')
+    # Usunięto cały kod związany z Plotly, ponieważ wykres jest renderowany po stronie klienta za pomocą Chart.js
+    # analiza_pv = AnalizaEnergiiPV(df_pv)
+    # suma_energii = analiza_pv._oblicz_sume_energii()
+    # fig_pv = go.Figure()
+    # for rok, grupa in suma_energii.groupby(level=0):
+    #     fig_pv.add_trace(go.Scatter(x=grupa.index.get_level_values(1), y=grupa.values, mode='lines', name=str(rok)))
+    # fig_pv.update_layout(
+    #     title='Energia wyprodukowana w elektrowniach słonecznych',
+    #     xaxis_title='Miesiąc',
+    #     yaxis_title='Suma energii (MWh)',
+    #     height=600,
+    #     width=800,
+    # )
+    # plot_html = plot(fig_pv, output_type='div')
 
     context = {
         'years': years_list,
-        'plot_html': plot_html,  # Dodano 'plot_html' do kontekstu
+        # 'plot_html': plot_html, # Usunięto plot_html z kontekstu
     }
     return render(request, 'app_energy25/produkcja_pv.html', context)
 
