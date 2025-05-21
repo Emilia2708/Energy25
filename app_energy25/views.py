@@ -6,6 +6,7 @@ import os
 from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 from wykresy.wykres_produkcja_pv import AnalizaEnergiiPV
+from wykresy.wykres_produkcja_wil import AnalizaEnergiiWil
 import json
 import logging
 # import plotly.graph_objects as go  # Usunięto import Plotly
@@ -32,6 +33,31 @@ def wczytaj_dane_pv():
         wpisy_pv_pogoda = pd.read_sql_query(query, engine)
         logger.info("Dane PV pomyślnie pobrane z bazy danych.")
         return wpisy_pv_pogoda
+    except Exception as e:
+        logger.error(f"Wystąpił błąd podczas pobierania danych z bazy danych: {e}", exc_info=True)
+        return None
+    finally:
+        if 'engine' in locals() and engine: # Sprawdzenie czy engine został zainicjalizowany
+            engine.dispose()
+
+def wczytaj_dane_wil():
+    """
+    Wczytuje dane PV z bazy danych PostgreSQL.
+    Obsługuje błędy połączenia i zapytania, loguje je i zwraca None w przypadku niepowodzenia.
+    """
+    load_dotenv()
+    db_user = os.getenv('DB_USER')
+    db_password = os.getenv('DB_PASS')
+    db_host = 'localhost'
+    db_port = os.getenv('DB_PORT')
+    db_name = os.getenv('DB_NAME')
+
+    try:
+        engine = create_engine(f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}')
+        query = text("SELECT * FROM wpisy_wil_pogoda")
+        wpisy_wil_pogoda = pd.read_sql_query(query, engine)
+        logger.info("Dane PV pomyślnie pobrane z bazy danych.")
+        return wpisy_wil_pogoda
     except Exception as e:
         logger.error(f"Wystąpił błąd podczas pobierania danych z bazy danych: {e}", exc_info=True)
         return None
@@ -99,6 +125,50 @@ def pobierz_dane_pv(request):
     else:
         return JsonResponse({'error': 'Dozwolona jest tylko metoda POST.'}, status=405)
 
+def produkcja_wiatrowa(request):
+    """
+    Wyświetla stronę z wykresem produkcji PV.
+    """
+    years_list = list(range(2015, 2024))
+    df_wil = wczytaj_dane_wil()  # Pobierz dane WIL
+    if df_wil is None:
+        return render(request, 'app_energy25/produkcja_wiatrowa.html', {'error': 'Nie udało się pobrać danych WIL z bazy danych'})
+
+    context = {
+        'years': years_list,
+    }
+    return render(request, 'app_energy25/produkcja_wiatrowa.html', context)
+
+
+@csrf_exempt
+def pobierz_dane_wil(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            selected_years = data.get('years', [])
+            logger.debug(f"Wybrane lata: {selected_years}")
+
+            df_wil = wczytaj_dane_wil()
+            logger.debug(f"Dane PV pobrane z bazy danych: {df_wil.head().to_string() if df_wil is not None else None}")
+
+            if df_wil is None:
+                return JsonResponse({'error': 'Nie udało się pobrać danych WIL z bazy danych. Sprawdź logi serwera.'}, status=500)
+
+            analiza_wil = AnalizaEnergiiWil(df_wil)
+            dane_wykresu = analiza_wil.pobierz_dane_dla_lat(selected_years)
+            logger.debug(f"Dane wykresu po przetworzeniu: {dane_wykresu}")
+
+            logger.info("Dane wykresu PV pomyślnie wygenerowane i zwrócone.")
+            return JsonResponse(dane_wykresu)
+        except json.JSONDecodeError as e:
+            logger.error(f"Błąd dekodowania JSON: {e}", exc_info=True)
+            return JsonResponse({'error': 'Nieprawidłowy format JSON.'}, status=400)
+        except Exception as e:
+            logger.error(f"Wystąpił błąd podczas przetwarzania żądania: {e}", exc_info=True)
+            return JsonResponse({'error': 'Wystąpił błąd serwera.'}, status=500)
+    else:
+        return JsonResponse({'error': 'Dozwolona jest tylko metoda POST.'}, status=405)
+
 def home(request):
     """
     Wyświetla stronę główną.
@@ -121,11 +191,11 @@ def predkosc_wiatru(request):
     """
     return generuj_widok_z_latami(request, 'predkosc_wiatru')
 
-def produkcja_wiatrowa(request):
-    """
-    Wyświetla stronę z wyborem lat do analizy produkcji wiatrowej.
-    """
-    return generuj_widok_z_latami(request, 'produkcja_wiatrowa')
+#def produkcja_wiatrowa(request):
+#    """
+#    Wyświetla stronę z wyborem lat do analizy produkcji wiatrowej.
+#    """
+#    return generuj_widok_z_latami(request, 'produkcja_wiatrowa')
 
 def suma_wiatrowa(request):
     """
