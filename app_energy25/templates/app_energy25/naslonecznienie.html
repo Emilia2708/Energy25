@@ -1,4 +1,5 @@
 {% load static %}
+{% csrf_token %}
 
 <!DOCTYPE html>
 <html>
@@ -11,6 +12,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Agbalumo:wght@400&display=swap" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yesteryear:wght@400&display=swap" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .list-item {
             display: flex;
@@ -44,6 +46,24 @@
         .label-text {
             font-size: 14px;
         }
+
+        /* Nowe style dla kontenera wykresu */
+        .chart-wrapper {
+            position: relative; /* Ustawienie na relative, aby canvas mógł być pozycjonowany wewnątrz, jeśli to konieczne, ale generalnie lepiej unikać absolutnego pozycjonowania dla canvas, chyba że jest to ściśle kontrolowane */
+            width: 100%; /* Ustaw szerokość na 100% dostępnego miejsca */
+            height: 600px; /* Rozsądna wysokość dla wykresu. Dostosuj, jeśli potrzebujesz więcej miejsca */
+            max-width: 1920px; /* Ogranicz maksymalną szerokość, jeśli to konieczne */
+            margin: 20px auto; /* Wyśrodkowanie i margines */
+            overflow: hidden; /* Ukryj to, co wychodzi poza kontener, ale Chart.js powinien dobrze skalować */
+            /* Jeśli wykres miałby być bardzo wysoki i wymagał przewijania, użyj: overflow-y: auto; */
+        }
+
+        #pvChart {
+            /* Usunięto position: absolute, top, left, width, height, aby pozwolić Chart.js na lepsze zarządzanie rozmiarem
+               wewnątrz jego nadrzędnego elementu (.chart-wrapper). */
+            width: 100% !important; /* Ważne, aby Chart.js prawidłowo skalował szerokość */
+            height: 100% !important; /* Ważne, aby Chart.js prawidłowo skalował wysokość */
+        }
     </style>
 </head>
 <body>
@@ -65,8 +85,8 @@
            <div class="scrollable-list-dialog" id="year-selection-dialog">
               <div class="content">
                      <div class="text-content">
-                        <div class="headline">Wybierz zakres</div>
-                        <div class="supporting-text">Zaznacz jeden lub więcej rok aby pobrać informacje</div>
+                        <div class="headline">Wybierz lata</div>
+                        <div class="supporting-text">Zaznacz lata, dla których chcesz zobaczyć produkcję energii PV</div>
                      </div>
                      <div class="list-container">
                         <div class="list">
@@ -90,11 +110,11 @@
                                <div class="label-text">Wyczyść</div>
                         </div>
                      </div>
-                     <button class="primary-button" onclick="getSelectedYears()">Pobierz</button>
+                     <button class="primary-button" onclick="fetchAndDrawChart()">Pobierz Wykres</button>
               </div>
            </div>
-           <div class="image-wrapper">
-              <img class="image-icon" alt="" src="{% static 'app_energy25/css/image.png' %}">
+
+           <div class="chart-wrapper" style="top: 581px;"> <canvas id="pvChart"></canvas>
            </div>
     </div>
 
@@ -115,9 +135,175 @@
 
         function getSelectedYears() {
             const checkboxes = document.querySelectorAll('#year-selection-dialog input[type="checkbox"]:checked');
-            const selectedYear = Array.from(checkboxes).map(checkbox => checkbox.value);
-            console.log("Wybrane miesiące:", selectedYear);
-            // Tutaj możesz wysłać te dane do backendu Django np. za pomocą AJAX
+            return Array.from(checkboxes).map(checkbox => checkbox.value);
+        }
+
+        async function fetchAndDrawChart() {
+            const selectedYears = getSelectedYears();
+            console.log("Wybrane lata:", selectedYears);
+
+            try {
+                const response = await fetch('/pobierz_dane_naslonecznienie/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    },
+                    body: JSON.stringify({ years: selectedYears }),
+                });
+
+                if (!response.ok) {
+                    console.error('Błąd podczas pobierania danych:', response.status);
+                    // Zamiast innerHTML na canvas, lepiej wyświetlić błąd w innym miejscu
+                    const chartWrapper = document.querySelector('.chart-wrapper');
+                    chartWrapper.innerHTML = '<p style="color: red; text-align: center;">Błąd podczas pobierania danych wykresu.</p>';
+                    return;
+                }
+
+                const data = await response.json();
+                if (!data || !data.labels || !data.values || Object.keys(data.values).length === 0 || data.labels.length === 0) {
+                    console.warn('Puste lub nieprawidłowe dane:', data);
+                    const chartWrapper = document.querySelector('.chart-wrapper');
+                    chartWrapper.innerHTML = '<p style="color: red; text-align: center;">Brak danych do wyświetlenia wykresu.</p>';
+                    return;
+                }
+                drawChart(data);
+
+            } catch (error) {
+                console.error('Wystąpił błąd:', error);
+                const chartWrapper = document.querySelector('.chart-wrapper');
+                chartWrapper.innerHTML = '<p style="color: red; text-align: center;">Wystąpił błąd podczas generowania wykresu.</p>';
+            }
+        }
+
+        function drawChart(chartData) {
+            const ctx = document.getElementById('pvChart').getContext('2d');
+            if (window.myChart) {
+                window.myChart.destroy();
+            }
+            const colors = [
+                'rgba(255, 99, 132, 0.8)',
+                'rgba(54, 162, 235, 0.8)',
+                'rgba(255, 206, 86, 0.8)',
+                'rgba(75, 192, 192, 0.8)',
+                'rgba(153, 102, 255, 0.8)',
+                'rgba(255, 159, 64, 0.8)',
+                'rgba(199, 0, 57, 0.8)',
+                'rgba(2, 136, 209, 0.8)',
+                'rgba(251, 192, 45, 0.8)',
+                'rgba(56, 142, 60, 0.8)',
+                'rgba(123, 36, 28, 0.8)',
+                'rgba(156, 39, 176, 0.8)'
+            ];
+
+            const datasets = [];
+            let colorIndex = 0;
+            for (const year in chartData.values) {
+                datasets.push({
+                    label: year,
+                    data: chartData.values[year],
+                    backgroundColor: colors[colorIndex % colors.length],
+                    borderColor: colors[colorIndex % colors.length],
+                    fill: false,
+                    pointRadius: 0
+                });
+                colorIndex++;
+            }
+
+            window.myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartData.labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, // KLUCZOWE: Pozwala Chart.js na dopasowanie do wysokości kontenera
+                    layout: {
+                        padding: {
+                            left: 50,
+                            right: 50,
+                            top: 50,
+                            bottom: 50
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            min: 0,
+                            // max: 200000000, // ZAKOMENTUJ LUB USUŃ, JEŚLI CHCESZ, ABY OŚ Y SKALOWAŁA SIĘ AUTOMATYCZNIE
+                            title: {
+                                display: true,
+                                text: 'Średnie nasłonecznienie [MWh/m^2]',
+                                font: {
+                                    size: 14
+                                }
+                            },
+                            ticks: {
+                                callback: function(value, index, values) {
+                                    // Sprawdź, czy wartość jest na tyle duża, że ma sens wyświetlanie "M"
+                                    if (value >= 1000000) {
+                                        return (value / 1000000).toFixed(1) + 'M'; // Zaokrągl do 1 miejsca po przecinku
+                                    } else if (value >= 1000) {
+                                        return (value / 1000).toFixed(1) + 'k'; // Wyświetl w tysiącach
+                                    }
+                                    return value;
+                                },
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Miesiąc',
+                                font: {
+                                    size: 14
+                                }
+                            },
+                            ticks: {
+                                autoSkip: false,
+                                maxRotation: 0,
+                                minRotation: 0,
+                                callback: function(value, index, values) {
+                                    const months = ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'];
+                                    return months[value - 1];
+                                },
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 14
+                                },
+                                usePointStyle: false
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Średnie nasłonecznienie dla poszczególnych miesięcy',
+                            font: {
+                                size: 18
+                            },
+                            padding: {
+                                bottom: 20
+                            }
+                        }
+                    },
+                    elements: {
+                        line: {
+                            tension: 0.4
+                        }
+                    }
+                }
+            });
         }
     </script>
 

@@ -323,6 +323,7 @@ try:
     # Zapis do PostgreSQL
     wpisy_wil_pogoda.to_sql('wpisy_wil_pogoda', engine, if_exists='replace', index=False)
     wpisy_pv_pogoda.to_sql('wpisy_pv_pogoda', engine, if_exists='replace', index=False)
+    pogoda_pv.to_sql('pogoda_pv', engine, if_exists='replace', index=False)
     print("Wszystkie DataFrames zostały zapisane do bazy danych PostgreSQL.")
 except Exception as e:
     print(f"Wystąpił błąd podczas zapisu do bazy danych: {e}")

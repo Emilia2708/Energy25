@@ -7,6 +7,8 @@ from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 from wykresy.wykres_produkcja_pv import AnalizaEnergiiPV
 from wykresy.wykres_produkcja_wil import AnalizaEnergiiWil
+from wykresy.wykres_predkosc_wiatru import PredkoscWiatru
+from wykresy.naslonecznienie import Naslonecznienie
 import json
 import logging
 # import plotly.graph_objects as go  # Usunięto import Plotly
@@ -58,6 +60,56 @@ def wczytaj_dane_wil():
         wpisy_wil_pogoda = pd.read_sql_query(query, engine)
         logger.info("Dane PV pomyślnie pobrane z bazy danych.")
         return wpisy_wil_pogoda
+    except Exception as e:
+        logger.error(f"Wystąpił błąd podczas pobierania danych z bazy danych: {e}", exc_info=True)
+        return None
+    finally:
+        if 'engine' in locals() and engine: # Sprawdzenie czy engine został zainicjalizowany
+            engine.dispose()
+
+def wczytaj_dane_wiatr():
+    """
+    Wczytuje dane PV z bazy danych PostgreSQL.
+    Obsługuje błędy połączenia i zapytania, loguje je i zwraca None w przypadku niepowodzenia.
+    """
+    load_dotenv()
+    db_user = os.getenv('DB_USER')
+    db_password = os.getenv('DB_PASS')
+    db_host = 'localhost'
+    db_port = os.getenv('DB_PORT')
+    db_name = os.getenv('DB_NAME')
+
+    try:
+        engine = create_engine(f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}')
+        query = text("SELECT * FROM pogoda_wil")
+        pogoda_wil = pd.read_sql_query(query, engine)
+        logger.info("Dane PV pomyślnie pobrane z bazy danych.")
+        return pogoda_wil
+    except Exception as e:
+        logger.error(f"Wystąpił błąd podczas pobierania danych z bazy danych: {e}", exc_info=True)
+        return None
+    finally:
+        if 'engine' in locals() and engine: # Sprawdzenie czy engine został zainicjalizowany
+            engine.dispose()
+
+def wczytaj_dane_naslonecznienie():
+    """
+    Wczytuje dane PV z bazy danych PostgreSQL.
+    Obsługuje błędy połączenia i zapytania, loguje je i zwraca None w przypadku niepowodzenia.
+    """
+    load_dotenv()
+    db_user = os.getenv('DB_USER')
+    db_password = os.getenv('DB_PASS')
+    db_host = 'localhost'
+    db_port = os.getenv('DB_PORT')
+    db_name = os.getenv('DB_NAME')
+
+    try:
+        engine = create_engine(f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}')
+        query = text("SELECT * FROM pogoda_pv")
+        pogoda_pv = pd.read_sql_query(query, engine)
+        logger.info("Dane PV pomyślnie pobrane z bazy danych.")
+        return pogoda_pv
     except Exception as e:
         logger.error(f"Wystąpił błąd podczas pobierania danych z bazy danych: {e}", exc_info=True)
         return None
@@ -169,6 +221,94 @@ def pobierz_dane_wil(request):
     else:
         return JsonResponse({'error': 'Dozwolona jest tylko metoda POST.'}, status=405)
 
+def predkosc_wiatru(request):
+    """
+    Wyświetla stronę z wykresem produkcji PV.
+    """
+    years_list = list(range(2015, 2024))
+    df_wiatr = wczytaj_dane_wiatr()  # Pobierz dane WIL
+    if df_wiatr is None:
+        return render(request, 'app_energy25/predkosc_wiatru.html', {'error': 'Nie udało się pobrać danych WIL z bazy danych'})
+
+    context = {
+        'years': years_list,
+    }
+    return render(request, 'app_energy25/predkosc_wiatru.html', context)
+
+
+@csrf_exempt
+def pobierz_dane_wiatr(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            selected_years = data.get('years', [])
+            logger.debug(f"Wybrane lata: {selected_years}")
+
+            df_wiatr = wczytaj_dane_wiatr()
+            logger.debug(f"Dane PV pobrane z bazy danych: {df_wiatr.head().to_string() if df_wiatr is not None else None}")
+
+            if df_wiatr is None:
+                return JsonResponse({'error': 'Nie udało się pobrać danych WIL z bazy danych. Sprawdź logi serwera.'}, status=500)
+
+            analiza_wiatr = PredkoscWiatru(df_wiatr)
+            dane_wykresu = analiza_wiatr.pobierz_dane_dla_lat(selected_years)
+            logger.debug(f"Dane wykresu po przetworzeniu: {dane_wykresu}")
+
+            logger.info("Dane wykresu PV pomyślnie wygenerowane i zwrócone.")
+            return JsonResponse(dane_wykresu)
+        except json.JSONDecodeError as e:
+            logger.error(f"Błąd dekodowania JSON: {e}", exc_info=True)
+            return JsonResponse({'error': 'Nieprawidłowy format JSON.'}, status=400)
+        except Exception as e:
+            logger.error(f"Wystąpił błąd podczas przetwarzania żądania: {e}", exc_info=True)
+            return JsonResponse({'error': 'Wystąpił błąd serwera.'}, status=500)
+    else:
+        return JsonResponse({'error': 'Dozwolona jest tylko metoda POST.'}, status=405)
+
+def naslonecznienie(request):
+    """
+    Wyświetla stronę z wykresem produkcji PV.
+    """
+    years_list = list(range(2015, 2024))
+    df_naslonecznienie = wczytaj_dane_naslonecznienie()  # Pobierz dane WIL
+    if df_naslonecznienie is None:
+        return render(request, 'app_energy25/naslonecznienie.html', {'error': 'Nie udało się pobrać danych WIL z bazy danych'})
+
+    context = {
+        'years': years_list,
+    }
+    return render(request, 'app_energy25/naslonecznienie.html', context)
+
+
+@csrf_exempt
+def pobierz_dane_naslonecznienie(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            selected_years = data.get('years', [])
+            logger.debug(f"Wybrane lata: {selected_years}")
+
+            df_naslonecznienie = wczytaj_dane_naslonecznienie()
+            logger.debug(f"Dane PV pobrane z bazy danych: {df_naslonecznienie.head().to_string() if df_naslonecznienie is not None else None}")
+
+            if df_naslonecznienie is None:
+                return JsonResponse({'error': 'Nie udało się pobrać danych WIL z bazy danych. Sprawdź logi serwera.'}, status=500)
+
+            analiza_naslonecznienie = Naslonecznienie(df_naslonecznienie)
+            dane_wykresu = analiza_naslonecznienie.pobierz_dane_dla_lat(selected_years)
+            logger.debug(f"Dane wykresu po przetworzeniu: {dane_wykresu}")
+
+            logger.info("Dane wykresu PV pomyślnie wygenerowane i zwrócone.")
+            return JsonResponse(dane_wykresu)
+        except json.JSONDecodeError as e:
+            logger.error(f"Błąd dekodowania JSON: {e}", exc_info=True)
+            return JsonResponse({'error': 'Nieprawidłowy format JSON.'}, status=400)
+        except Exception as e:
+            logger.error(f"Wystąpił błąd podczas przetwarzania żądania: {e}", exc_info=True)
+            return JsonResponse({'error': 'Wystąpił błąd serwera.'}, status=500)
+    else:
+        return JsonResponse({'error': 'Dozwolona jest tylko metoda POST.'}, status=405)
+
 def home(request):
     """
     Wyświetla stronę główną.
@@ -185,11 +325,11 @@ def generuj_widok_z_latami(request, szablon):
     }
     return render(request, f'app_energy25/{szablon}.html', context)
 
-def predkosc_wiatru(request):
-    """
-    Wyświetla stronę z wyborem lat do analizy prędkości wiatru.
-    """
-    return generuj_widok_z_latami(request, 'predkosc_wiatru')
+#def predkosc_wiatru(request):
+#    """
+#    Wyświetla stronę z wyborem lat do analizy prędkości wiatru.
+ #   """
+  #  return generuj_widok_z_latami(request, 'predkosc_wiatru')
 
 #def produkcja_wiatrowa(request):
 #    """
@@ -208,12 +348,6 @@ def lokalizacje_wiatrowe(request):
     Wyświetla stronę z wyborem lat do analizy lokalizacji wiatrowych.
     """
     return generuj_widok_z_latami(request, 'lokalizacje_wiatrowe')
-
-def naslonecznienie(request):
-    """
-    Wyświetla stronę z wyborem lat do analizy nasłonecznienia.
-    """
-    return generuj_widok_z_latami(request, 'naslonecznienie')
 
 def suma_pv(request):
     """
