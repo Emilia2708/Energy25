@@ -9,6 +9,7 @@ from wykresy.wykres_produkcja_pv import AnalizaEnergiiPV
 from wykresy.wykres_produkcja_wil import AnalizaEnergiiWil
 from wykresy.wykres_predkosc_wiatru import PredkoscWiatru
 from wykresy.naslonecznienie import Naslonecznienie
+from wykresy.wykres_suma_pv import SumaPV
 import json
 import logging
 # import plotly.graph_objects as go  # Usunięto import Plotly
@@ -296,6 +297,50 @@ def pobierz_dane_naslonecznienie(request):
 
             analiza_naslonecznienie = Naslonecznienie(df_naslonecznienie)
             dane_wykresu = analiza_naslonecznienie.pobierz_dane_dla_lat(selected_years)
+            logger.debug(f"Dane wykresu po przetworzeniu: {dane_wykresu}")
+
+            logger.info("Dane wykresu PV pomyślnie wygenerowane i zwrócone.")
+            return JsonResponse(dane_wykresu)
+        except json.JSONDecodeError as e:
+            logger.error(f"Błąd dekodowania JSON: {e}", exc_info=True)
+            return JsonResponse({'error': 'Nieprawidłowy format JSON.'}, status=400)
+        except Exception as e:
+            logger.error(f"Wystąpił błąd podczas przetwarzania żądania: {e}", exc_info=True)
+            return JsonResponse({'error': 'Wystąpił błąd serwera.'}, status=500)
+    else:
+        return JsonResponse({'error': 'Dozwolona jest tylko metoda POST.'}, status=405)
+
+def suma_pv(request):
+    """
+    Wyświetla stronę z wykresem produkcji PV.
+    """
+    years_list = list(range(2015, 2024))
+    df_suma_pv = wczytaj_dane_pv()  # Pobierz dane WIL
+    if df_suma_pv is None:
+        return render(request, 'app_energy25/suma_pv.html', {'error': 'Nie udało się pobrać danych WIL z bazy danych'})
+
+    context = {
+        'years': years_list,
+    }
+    return render(request, 'app_energy25/suma_pv.html', context)
+
+
+@csrf_exempt
+def pobierz_suma_pv(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            selected_years = data.get('years', [])
+            logger.debug(f"Wybrane lata: {selected_years}")
+
+            df_suma_pv = wczytaj_dane_pv()
+            logger.debug(f"Dane PV pobrane z bazy danych: {df_suma_pv.head().to_string() if df_suma_pv is not None else None}")
+
+            if df_suma_pv is None:
+                return JsonResponse({'error': 'Nie udało się pobrać danych WIL z bazy danych. Sprawdź logi serwera.'}, status=500)
+
+            analiza_suma_pv = SumaPV(df_suma_pv)
+            dane_wykresu = analiza_suma_pv.pobierz_dane_dla_lat(selected_years)
             logger.debug(f"Dane wykresu po przetworzeniu: {dane_wykresu}")
 
             logger.info("Dane wykresu PV pomyślnie wygenerowane i zwrócone.")
