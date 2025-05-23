@@ -11,7 +11,12 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Agbalumo:wght@400&display=swap" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yesteryear:wght@400&display=swap" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha2d14-hcFhM9F2XjB1y/sC9NnLg0m9vT5rQe9j+hW1rQ9o/wA2J5eL6b8B7A8C9D0E=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha2d14-o1L5v0uM0s2J5g8d9m4L0s1u2H0y3F4E5G6H7I8J9K0L1M2N3O4P5Q6R7S8T9U0V1W2X3Y4Z" crossorigin=""></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
+        /* Twoje istniejące style, ale usunięte te dotyczące selektora lat */
+        /*
         .list-item {
             display: flex;
             align-items: center;
@@ -44,11 +49,98 @@
         .label-text {
             font-size: 14px;
         }
+        */
+
+        /* Zaktualizowany styl dla kontenera mapy */
+        #map {
+            width: 80%; /* Dostosuj szerokość */
+            height: 600px; /* Dostosuj wysokość */
+            margin: 20px auto; /* Zmniejszono górny margines, ponieważ nagłówki są teraz u góry */
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        /* Zmodyfikowane style dla kontenerów nagłówków, aby zapewnić odpowiednie odstępy */
+        .rednia-prdko-wiatru-inner {
+            position: relative; /* Zmień na relative */
+            top: 0px;
+            left: 0px;
+            width: 100%;
+            height: 94px;
+            overflow: hidden;
+            font-size: 64px;
+            color: #1e1e1e;
+            font-family: Yesteryear;
+            margin-bottom: 20px; /* Dodaj margines dolny */
+            background: linear-gradient(90deg, #9b9faa, #cfc1b4 64.42%, rgba(185, 174, 170, 0.98) 96.15%); /* Dodano tło, jeśli nie ma w global.css */
+        }
+
+        .rednia-prdko-wiatru-parent {
+            position: relative; /* Zmień na relative */
+            top: 0px;
+            left: 0px;
+            width: 100%; /* Ustaw 100% szerokości, aby był responsywny */
+            height: 73px;
+            overflow: hidden;
+            margin-bottom: 20px; /* Dodaj margines dolny */
+        }
+
+        /* Styl dla całego kontenera */
+        .rednia-prdko-wiatru {
+            width: 100%;
+            position: relative;
+            background-color: #fff;
+            min-height: 1000px; /* Zwiększ wysokość, aby pomieścić mapę i uniknąć scrollowania */
+            overflow-x: hidden; /* Ukryj poziomy pasek przewijania, jeśli nie jest potrzebny */
+            text-align: left;
+            font-size: 40px;
+            color: #000;
+            font-family: Agbalumo;
+            padding-top: 10px; /* Dodaj trochę przestrzeni na górze */
+        }
+
+        /* Upewnij się, że tekst w nagłówkach jest dobrze widoczny */
+        .rednia-prdko-wiatru1 {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            text-shadow: 1px 0 0 rgba(0, 0, 0, 0.2), 0 1px 0 rgba(0, 0, 0, 0.2), -1px 0 0 rgba(0, 0, 0, 0.2), 0 -1px 0 rgba(0, 0, 0, 0.2);
+            padding-left: 20px;
+            padding-top: 10px;
+        }
+
+        .energy25 {
+            position: absolute;
+            top: calc(50% - 47px); /* Dostosuj w razie potrzeby */
+            left: calc(50% - 109px); /* Dostosuj w razie potrzeby, aby wyśrodkować */
+            display: inline-block;
+            width: 230px;
+            text-align: center; /* Aby tekst był wyśrodkowany w swoim divie */
+            line-height: 94px; /* Wyśrodkowanie pionowe */
+            color: #1e1e1e; /* Upewnij się, że kolor tekstu jest widoczny na tle */
+        }
+
+        .nav-item {
+            position: absolute;
+            top: 10px; /* Dostosuj pozycję ikony domu */
+            right: 20px; /* Dostosuj pozycję ikony domu */
+            list-style: none; /* Usuń punktor listy */
+        }
+        .vector-icon {
+            width: 40px; /* Dostosuj rozmiar ikony domu */
+            height: auto;
+        }
     </style>
 </head>
 <body>
 
     <div class="rednia-prdko-wiatru">
+           <div class="rednia-prdko-wiatru-inner">
+              <div class="energy25-wrapper">
+                     <div class="energy25">Energy25</div>
+              </div>
+           </div>
+
            <div class="rednia-prdko-wiatru-parent">
               <div class="rednia-prdko-wiatru1">Lokalizacje elektrowni wiatrowych</div>
                <li class="nav-item">
@@ -57,69 +149,11 @@
                    </a>
                </li>
            </div>
-           <div class="rednia-prdko-wiatru-inner">
-              <div class="energy25-wrapper">
-                     <div class="energy25">Energy25</div>
-              </div>
-           </div>
-           <div class="scrollable-list-dialog" id="year-selection-dialog">
-              <div class="content">
-                     <div class="text-content">
-                        <div class="headline">Wybierz zakres</div>
-                        <div class="supporting-text">Zaznacz jeden lub więcej rok aby pobrać informacje</div>
-                     </div>
-                     <div class="list-container">
-                        <div class="list">
-                            {% for year in years %}
-                            <div class="list-item">
-                                <input type="checkbox" name="selected_year" value="{{ year }}">
-                                <span>{{ year }}</span>
-                            </div>
-                            {% endfor %}
-                        </div>
-                     </div>
-              </div>
-              <div class="actions">
-                     <div class="secondary-button" onclick="selectAllYears()">
-                        <div class="state-layer24">
-                               <div class="label-text">Zaznacz Wszystko</div>
-                        </div>
-                     </div>
-                     <div class="secondary-button" onclick="clearAllYears()">
-                        <div class="state-layer24">
-                               <div class="label-text">Wyczyść</div>
-                        </div>
-                     </div>
-                     <button class="primary-button" onclick="getSelectedYears()">Pobierz</button>
-              </div>
-           </div>
-           <div class="image-wrapper">
-              <img class="image-icon" alt="" src="{% static 'app_energy25/css/image.png' %}">
+
+           <div id="map">
+                {{ map_html|safe }}
            </div>
     </div>
 
-    <script>
-        function selectAllYears() {
-            const checkboxes = document.querySelectorAll('#year-selection-dialog input[type="checkbox"]');
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = true;
-            });
-        }
-
-        function clearAllYears() {
-            const checkboxes = document.querySelectorAll('#year-selection-dialog input[type="checkbox"]');
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = false;
-            });
-        }
-
-        function getSelectedYears() {
-            const checkboxes = document.querySelectorAll('#year-selection-dialog input[type="checkbox"]:checked');
-            const selectedYear = Array.from(checkboxes).map(checkbox => checkbox.value);
-            console.log("Wybrane miesiące:", selectedYear);
-            // Tutaj możesz wysłać te dane do backendu Django np. za pomocą AJAX
-        }
-    </script>
-
-</body>
+    </body>
 </html>

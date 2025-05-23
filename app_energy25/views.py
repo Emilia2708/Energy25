@@ -4,7 +4,7 @@ import pandas as pd
 import folium
 import re
 import os
-from django.conf import settings  # Dodane
+from django.conf import settings
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -22,12 +22,8 @@ from wykresy.wykres_suma_pv import SumaPV
 logger = logging.getLogger(__name__)
 
 
-# --- Istniejące funkcje wczytywania danych ---
+# --- Istniejące funkcje wczytywania danych (pozostają bez zmian) ---
 def wczytaj_dane_pv():
-    """
-    Wczytuje dane PV z bazy danych PostgreSQL.
-    Obsługuje błędy połączenia i zapytania, loguje je i zwraca None w przypadku niepowodzenia.
-    """
     load_dotenv()
     db_user = os.getenv('DB_USER')
     db_password = os.getenv('DB_PASS')
@@ -115,27 +111,17 @@ def wczytaj_dane_naslonecznienie():
             engine.dispose()
 
 
-# --- Funkcja pomocnicza do konwersji DMS na Stopnie Dziesiętne ---
+# --- Funkcja pomocnicza do konwersji DMS na Stopnie Dziesiętne (pozostaje bez zmian) ---
 def dms_to_dd(dms_str):
-    """
-    Konwertuje współrzędne geograficzne z formatu Stopnie-Minuty-Sekundy (DMS)
-    na stopnie dziesiętne (DD). Obsługuje format 'DD°MM'DIR' lub 'DD.DDDIR'.
-    """
     if pd.isna(dms_str) or not isinstance(dms_str, str):
         return None
-
-    # Regex do wychwycenia stopni, opcjonalnych minut/sekund i kierunku
-    # Przykłady: "52°14'N", "21°0'E", "52N", "21E"
     match = re.match(r'(\d+)[°]?(\d+\.?\d*)?[\']?([NSEW])', dms_str.strip(), re.IGNORECASE)
-
     if not match:
         logger.warning(f"Nie udało się sparsować wartości DMS: '{dms_str}'")
         return None
-
     degrees = float(match.group(1))
     minutes = float(match.group(2)) if match.group(2) else 0.0
     direction = match.group(3).upper()
-
     dd = degrees + minutes / 60
     if direction in ('S', 'W'):
         dd *= -1
@@ -144,16 +130,11 @@ def dms_to_dd(dms_str):
 
 # --- Widok dla mapy lokalizacji PV (zmodyfikowany) ---
 def lokalizacje_pv(request):
-    """
-    Wyświetla stronę z mapą lokalizacji instalacji fotowoltaicznych.
-    """
     df_pv = wczytaj_dane_pv()
     if df_pv is None:
         return render(request, 'app_energy25/lokalizacje_pv.html',
                       {'error': 'Nie udało się pobrać danych PV z bazy danych'})
 
-    # Ścieżka do pliku wspgeog.xlsx
-    # Zakładamy, że plik wspgeog.xlsx znajduje się w podkatalogu 'data' wewnątrz 'app_energy25'
     wspgeog_path = os.path.join(settings.BASE_DIR, 'app_energy25', 'data', 'wspgeog.xlsx')
 
     try:
@@ -168,7 +149,6 @@ def lokalizacje_pv(request):
         return render(request, 'app_energy25/lokalizacje_pv.html',
                       {'error': f'Błąd podczas wczytywania danych geograficznych: {e}'})
 
-    # Użyj 'Miejscowosc' do połączenia danych
     if 'Miejscowosc' not in df_pv.columns or 'Miejscowosc' not in wspgeog.columns:
         logger.error("Brak kolumny 'Miejscowosc' w jednym z dataframe'ów. Nie można połączyć.")
         return render(request, 'app_energy25/lokalizacje_pv.html',
@@ -183,7 +163,6 @@ def lokalizacje_pv(request):
         return render(request, 'app_energy25/lokalizacje_pv.html', {
             'error': 'Brak danych lokalizacji do wyświetlenia na mapie. Sprawdź, czy dane Miejscowość są spójne w obu źródłach.'})
 
-    # Konwersja współrzędnych i filtrowanie wartości None
     mapa_pv_data['Szerokosc_dd'] = mapa_pv_data['Szerokosc'].apply(dms_to_dd)
     mapa_pv_data['Dlugosc_dd'] = mapa_pv_data['Dlugosc'].apply(dms_to_dd)
     mapa_pv_data = mapa_pv_data.dropna(subset=['Szerokosc_dd', 'Dlugosc_dd'])
@@ -193,7 +172,6 @@ def lokalizacje_pv(request):
         return render(request, 'app_energy25/lokalizacje_pv.html',
                       {'error': 'Nie udało się przetworzyć współrzędnych geograficznych. Sprawdź format danych.'})
 
-    # Obliczanie średniej długości i szerokości potrzebnej do wycentrowania mapy
     avg_lat = mapa_pv_data['Szerokosc_dd'].mean()
     avg_lon = mapa_pv_data['Dlugosc_dd'].mean()
 
@@ -203,21 +181,87 @@ def lokalizacje_pv(request):
         folium.Marker(
             location=[row['Szerokosc_dd'], row['Dlugosc_dd']],
             popup=row['Miejscowosc'],
-            icon=folium.Icon(icon="solar-panel", prefix='fa')  # Użycie ikony solar-panel z Font Awesome
+            icon=folium.Icon(icon="solar-panel", prefix='fa')
         ).add_to(m_pv)
 
-    # Zapisanie mapy do ciągu HTML
     map_html = m_pv._repr_html_()
 
-    years_list = list(range(2015, 2024))  # Lista lat do wyświetlenia w selektorze (jeśli nadal potrzebny)
     context = {
-        'years': years_list,
         'map_html': map_html,
     }
     return render(request, 'app_energy25/lokalizacje_pv.html', context)
 
 
-# --- Pozostałe istniejące funkcje z views.py ---
+# --- NOWA FUNKCJA WIDOKU DLA LOKALIZACJI WIATROWYCH ---
+def lokalizacje_wiatrowe(request):
+    """
+    Wyświetla stronę z mapą lokalizacji instalacji wiatrowych.
+    """
+    df_wil = wczytaj_dane_wil()
+    if df_wil is None:
+        return render(request, 'app_energy25/lokalizacje_wiatrowe.html',
+                      {'error': 'Nie udało się pobrać danych WIL z bazy danych'})
+
+    # Ścieżka do pliku wspgeog.xlsx (tak samo jak dla PV)
+    wspgeog_path = os.path.join(settings.BASE_DIR, 'app_energy25', 'data', 'wspgeog.xlsx')
+
+    try:
+        wspgeog = pd.read_excel(wspgeog_path)
+        logger.info(f"Plik wspgeog.xlsx wczytany z: {wspgeog_path}")
+    except FileNotFoundError:
+        logger.error(f"Plik wspgeog.xlsx nie został znaleziony pod ścieżką: {wspgeog_path}")
+        return render(request, 'app_energy25/lokalizacje_wiatrowe.html', {
+            'error': 'Nie udało się znaleźć pliku z danymi geograficznymi (wspgeog.xlsx). Upewnij się, że znajduje się w app_energy25/data/'})
+    except Exception as e:
+        logger.error(f"Wystąpił błąd podczas wczytywania wspgeog.xlsx: {e}", exc_info=True)
+        return render(request, 'app_energy25/lokalizacje_wiatrowe.html',
+                      {'error': f'Błąd podczas wczytywania danych geograficznych: {e}'})
+
+    if 'Miejscowosc' not in df_wil.columns or 'Miejscowosc' not in wspgeog.columns:
+        logger.error("Brak kolumny 'Miejscowosc' w jednym z dataframe'ów. Nie można połączyć.")
+        return render(request, 'app_energy25/lokalizacje_wiatrowe.html',
+                      {'error': "Brak kolumny 'Miejscowosc' w danych WIL lub geograficznych."})
+
+    mapa_wil_data = df_wil[['Miejscowosc']].drop_duplicates()
+    mapa_wil_data = pd.merge(mapa_wil_data, wspgeog, on='Miejscowosc', how='inner')
+
+    if mapa_wil_data.empty:
+        logger.warning("Brak danych po połączeniu tabel Miejscowosc i wspgeog. Nie można wygenerować mapy.")
+        return render(request, 'app_energy25/lokalizacje_wiatrowe.html', {
+            'error': 'Brak danych lokalizacji do wyświetlenia na mapie. Sprawdź, czy dane Miejscowość są spójne w obu źródłach.'})
+
+    # Konwersja współrzędnych i filtrowanie wartości None
+    mapa_wil_data['Szerokosc_dd'] = mapa_wil_data['Szerokosc'].apply(dms_to_dd)
+    mapa_wil_data['Dlugosc_dd'] = mapa_wil_data['Dlugosc'].apply(dms_to_dd)
+    mapa_wil_data = mapa_wil_data.dropna(subset=['Szerokosc_dd', 'Dlugosc_dd'])
+
+    if mapa_wil_data.empty:
+        logger.warning("Brak prawidłowych współrzędnych po konwersji DMS na DD. Nie można wygenerować mapy.")
+        return render(request, 'app_energy25/lokalizacje_wiatrowe.html',
+                      {'error': 'Nie udało się przetworzyć współrzędnych geograficznych. Sprawdź format danych.'})
+
+    # Obliczanie średniej długości i szerokości potrzebnej do wycentrowania mapy
+    avg_lat = mapa_wil_data['Szerokosc_dd'].mean()
+    avg_lon = mapa_wil_data['Dlugosc_dd'].mean()
+
+    m_wil = folium.Map(location=[avg_lat, avg_lon], zoom_start=6.5)
+
+    for index, row in mapa_wil_data.iterrows():
+        folium.Marker(
+            location=[row['Szerokosc_dd'], row['Dlugosc_dd']],
+            popup=row['Miejscowosc'],
+            icon=folium.Icon(icon="cloud", prefix='fa') # Użycie ikony "cloud"
+        ).add_to(m_wil)
+
+    # Zapisanie mapy do ciągu HTML
+    map_html = m_wil._repr_html_()
+
+    context = {
+        'map_html': map_html,
+    }
+    return render(request, 'app_energy25/lokalizacje_wiatrowe.html', context)
+
+# --- Pozostałe istniejące funkcje z views.py (pozostają bez zmian) ---
 
 def produkcja_pv(request):
     years_list = list(range(2015, 2024))
@@ -447,34 +491,33 @@ def home(request):
     return render(request, 'app_energy25/home_page.html')
 
 
-def generuj_widok_z_latami(request, szablon):
-    """
-    Generuje widok z listą lat 2015-2024.
-    """
-    years_list = list(range(2015, 2024))
-    context = {
-        'years': years_list,
-    }
-    return render(request, f'app_energy25/{szablon}.html', context)
+# Zastąp tę funkcję, ponieważ będziemy bezpośrednio generować mapę w 'lokalizacje_wiatrowe'
+# def generuj_widok_z_latami(request, szablon):
+#     years_list = list(range(2015, 2024))
+#     context = {
+#         'years': years_list,
+#     }
+#     return render(request, f'app_energy25/{szablon}.html', context)
 
 
 def suma_wiatrowa(request):
     """
     Wyświetla stronę z wyborem lat do analizy sumy produkcji wiatrowej.
     """
-    return generuj_widok_z_latami(request, 'suma_wiatrowa')
+    years_list = list(range(2015, 2024))
+    df_wil = wczytaj_dane_wil()
+    if df_wil is None:
+        return render(request, 'app_energy25/suma_wiatrowa.html',
+                      {'error': 'Nie udało się pobrać danych WIL z bazy danych'})
 
+    context = {
+        'years': years_list,
+    }
+    return render(request, 'app_energy25/suma_wiatrowa.html', context)
 
-def lokalizacje_wiatrowe(request):
-    """
-    Wyświetla stronę z wyborem lat do analizy lokalizacji wiatrowych.
-    """
-    return generuj_widok_z_latami(request, 'lokalizacje_wiatrowe')
-
-# Pamiętaj, że funkcja lokalizacje_pv została zmodyfikowana na początku pliku
-# do generowania mapy, więc ta poniżej jest redundantna.
-# def lokalizacje_pv(request):
+# Usunęliśmy starą definicję lokalizacje_wiatrowe, zastępując ją nową na górze pliku.
+# def lokalizacje_wiatrowe(request):
 #     """
-#     Wyświetla stronę z wyborem lat do analizy lokalizacji PV.
+#     Wyświetla stronę z wyborem lat do analizy lokalizacji wiatrowych.
 #     """
-#     return generuj_widok_z_latami(request, 'lokalizacje_pv')
+#     return generuj_widok_z_latami(request, 'lokalizacje_wiatrowe')
